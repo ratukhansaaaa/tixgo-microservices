@@ -4,6 +4,7 @@ from typing import Dict, List, Optional
 
 import jwt
 from fastapi import FastAPI, HTTPException, Header
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 app = FastAPI(title="TixGo Attendance Service", version="1.0.0")
@@ -45,6 +46,55 @@ class CheckinRequest(BaseModel):
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "attendance"}
+
+
+@app.get("/", response_class=HTMLResponse)
+def root():
+        return """
+        <html>
+            <head><title>TixGo Attendance Service</title></head>
+            <body>
+                <h1>TixGo Attendance Service</h1>
+                <ul>
+                    <li><a href="/docs">Interactive API docs (Swagger)</a></li>
+                    <li><a href="/redoc">ReDoc</a></li>
+                    <li><a href="/health">Health</a></li>
+                </ul>
+            </body>
+        </html>
+        """
+
+
+@app.get("/redoc")
+def redoc_page():
+        return HTMLResponse(content="""
+        <!doctype html>
+        <html>
+            <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>TixGo Attendance Service - ReDoc</title>
+                <style>body{margin:0;padding:0;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}</style>
+            </head>
+            <body>
+                <noscript>
+                    <strong>ReDoc requires JavaScript to function. Please enable it to browse the documentation.</strong>
+                </noscript>
+                <redoc spec-url="/openapi.json"></redoc>
+                <script>
+                    (function(){
+                        var script = document.createElement('script');
+                        script.src = 'https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js';
+                        script.onload = function(){ /* loaded */ };
+                        script.onerror = function(){
+                            document.body.innerHTML = '<div style="padding:24px;font-family:inherit"><h1>Documentation (ReDoc)</h1><p>Failed to load ReDoc from CDN. You can use the interactive Swagger UI instead:</p><p><a href="/docs">Open Swagger UI</a></p><pre style="background:#f5f5f5;padding:12px;border-radius:6px">OpenAPI spec available at /openapi.json</pre></div>';
+                        };
+                        document.body.appendChild(script);
+                    })();
+                </script>
+            </body>
+        </html>
+        """, media_type="text/html")
 
 
 @app.post("/checkins")
