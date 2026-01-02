@@ -1,0 +1,20 @@
+services:
+  identity-service:
+    build:
+      context: ./identity-service
+    container_name: tixgo-identity
+    env_file:
+      - .env
+    ports:
+      - "18081:8000"
+    restart: unless-stopped
+
+  attendance-service:
+    build:
+      context: ./attendance-service
+    container_name: tixgo-attendance
+    env_file:
+      - .env
+    ports:
+      - "18082:8000"
+    restart: unless-stopped
