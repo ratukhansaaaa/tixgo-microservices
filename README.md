@@ -1,660 +1,3331 @@
-# TixGo MicroservicesTixGo Microservices
+# TixGo Microservices# TixGo Microservices# TixGo Microservices# TixGo Microservices# TixGo MicroservicesTixGo Microservices
 
-===================
+
 
 Sistem microservices berbasis FastAPI untuk manajemen ticketing dan event attendance. Proyek ini mendemonstrasikan implementasi arsitektur microservices dengan autentikasi JWT, otorisasi berbasis role, dan komunikasi inter-service.
 
-This repository contains two FastAPI microservices used for the TixGo final project:
 
-## 📋 Daftar Isi
 
-- **identity-service**: authentication & authorization (register, login, me, role-based access)
+## Daftar IsiSistem microservices berbasis FastAPI untuk manajemen ticketing dan event attendance. Proyek ini mendemonstrasikan implementasi arsitektur microservices dengan autentikasi JWT, otorisasi berbasis role, dan komunikasi inter-service.
 
-- [Overview](#overview)- **attendance-service**: check-in management (create checkin, fetch attendance per event)
+
+
+- [Overview](#overview)
 
 - [Arsitektur Sistem](#arsitektur-sistem)
 
-- [Persyaratan Deployment](#persyaratan-deployment)## Architecture Overview
+- [Persyaratan Deployment](#persyaratan-deployment)## Daftar IsiSistem microservices berbasis FastAPI untuk manajemen ticketing dan event attendance. Proyek ini mendemonstrasikan implementasi arsitektur microservices dengan autentikasi JWT, otorisasi berbasis role, dan komunikasi inter-service.
 
-- [Panduan Deployment di STB](#panduan-deployment-di-stb)
+- [Panduan Deployment](#panduan-deployment)
 
-- [Cara Mengakses Layanan](#cara-mengakses-layanan)```
+- [Cara Mengakses Layanan](#cara-mengakses-layanan)
 
-- [Dokumentasi API](#dokumentasi-api)┌─────────────────────────────────────────────────────────────┐
+- [Dokumentasi API](#dokumentasi-api)
 
-- [Autentikasi & Otorisasi](#autentikasi--otorisasi)│                    Public Internet / STB                     │
+- [Autentikasi dan Otorisasi](#autentikasi-dan-otorisasi)- [Overview](#overview)
 
-- [Testing](#testing)└─────────────────────────────────────────────────────────────┘
+- [Testing](#testing)
 
-- [Troubleshooting](#troubleshooting)              ↓                              ↓
+- [Troubleshooting](#troubleshooting)- [Arsitektur Sistem](#arsitektur-sistem)
 
-        Port 18081                     Port 18082
 
----              ↓                              ↓
 
-    ┌──────────────────┐        ┌──────────────────┐
+## Overview- [Persyaratan Deployment](#persyaratan-deployment)## Daftar IsiSistem microservices berbasis FastAPI untuk manajemen ticketing dan event attendance. Proyek ini mendemonstrasikan implementasi arsitektur microservices dengan autentikasi JWT, otorisasi berbasis role, dan komunikasi inter-service.===================
 
-## Overview    │ Identity Service │        │Attendance Service│
 
-    │   (FastAPI)      │        │   (FastAPI)      │
 
-**TixGo Microservices** terdiri dari dua layanan independen yang dirancang untuk menangani aspek berbeda dari sistem manajemen event:    │                  │        │                  │
+TixGo Microservices terdiri dari dua layanan independen:- [Panduan Deployment](#panduan-deployment)
 
-    │ • Register       │        │ • Create Checkin │
 
-### 1. **Identity Service** (Port 18081)    │ • Login (JWT)    │        │ • Get Attendance │
 
-Menangani:    │ • /me endpoint   │        │ • Authorization  │
+**1. Identity Service (Port 18081)**- [Cara Mengakses Layanan](#cara-mengakses-layanan)
 
-- Registrasi user baru    └──────────────────┘        └──────────────────┘
+- Menangani autentikasi dan manajemen identitas user
 
-- Login dan token generation (JWT)         8000/tcp                      8000/tcp
+- Registrasi user baru dengan password hashing (bcrypt)- [Dokumentasi API](#dokumentasi-api)
 
-- Verifikasi identitas user              ↓                              ↓
+- Login dan token generation (JWT HS256)
 
-- Manajemen role (committee, admin)    ┌──────────────────┐        ┌──────────────────┐
+- Verifikasi identitas user melalui endpoint `/me`- [Autentikasi dan Otorisasi](#autentikasi-dan-otorisasi)- [Overview](#overview)
 
-    │   Container      │        │   Container      │
+- Manajemen role berbasis (committee, admin)
 
-### 2. **Attendance Service** (Port 18082)    │ (Python 3.11)    │        │ (Python 3.11)    │
+- [Testing](#testing)
 
-Menangani:    └──────────────────┘        └──────────────────┘
+**2. Attendance Service (Port 18082)**
 
-- Check-in peserta ke event```
+- Menangani check-in peserta dan pencatatan kehadiran- [Troubleshooting](#troubleshooting)- [Arsitektur Sistem](#arsitektur-sistem)
 
-- Pencatatan kehadiran per event
+- Check-in peserta ke event dengan validasi token
 
-- Query data kehadiran dengan filter event## Deployment Files
+- Pencatatan kehadiran per event dengan timestamp
 
-- Validasi token dari Identity Service
+- Query data kehadiran dengan filter event
 
-- `docker-compose.yml` — development compose file
+- Validasi token dari Identity Service## Overview- [Persyaratan Deployment](#persyaratan-deployment)## Daftar IsiSistem microservices berbasis FastAPI untuk manajemen ticketing dan event attendance. Proyek ini mendemonstrasikan implementasi arsitektur microservices dengan autentikasi JWT, otorisasi berbasis role, dan komunikasi inter-service.
 
-**Tech Stack:**- `docker-compose.prod.yml` — production-ready compose file with host ports mapped (18081/18082)
 
-- FastAPI 0.115.6- `deploy.sh` — automated deployment script for STB
 
-- Python 3.11- `smoke-test.sh` — quick verification/testing script
+**Tech Stack:** FastAPI 0.115.6, Python 3.11, Docker, JWT Authentication (HS256), bcrypt password hashing, in-memory data store.
 
-- Docker & Docker Compose- `cloudflared/config.yml.example` — example Cloudflare Tunnel config 
 
-- JWT Authentication (HS256)- `.env.example` — environment variables template
 
-- In-memory data store
+## Arsitektur SistemTixGo Microservices terdiri dari dua layanan independen yang dirancang untuk menangani aspek berbeda dari sistem manajemen event:- [Panduan Deployment](#panduan-deployment)
 
-## API Endpoints Reference
 
----
 
-### Identity Service (Port 18081)
+Dua layanan berjalan di Docker containers yang terpisah dengan port mapping masing-masing:
 
-## Arsitektur Sistem
 
-#### 1. Health Check
 
-``````http
+- **Identity Service**: berjalan di port 18081### 1. Identity Service (Port 18081)- [Cara Mengakses Layanan](#cara-mengakses-layanan)
 
-┌─────────────────────────────────────────────────────────────────┐GET /health
+- **Attendance Service**: berjalan di port 18082
 
-│                    Public Internet / STB                         │```
 
-│             (Diakses via domain atau IP publik)                 │**Response:** `200 OK`
 
-└──────────────────────────┬──────────────────────────────────────┘```json
+Kedua services dapat diakses melalui:
 
-                           │{
+1. Lokal (localhost) - untuk testing di STBMenangani seluruh aspek autentikasi dan manajemen identitas:- [Dokumentasi API](#dokumentasi-api)
 
-            ┌──────────────┴──────────────┐  "status": "ok",
+2. IP Address - dari network yang sama
 
-            │                             │  "service": "identity-service"
+3. Domain publik - via Cloudflare Tunnel atau reverse proxy
 
-       Port 18081                   Port 18082}
 
-            │                             │```
 
-    ┌───────▼─────────────┐     ┌────────▼─────────────┐
+Services berkomunikasi melalui shared JWT_SECRET untuk validasi token. Setiap service memiliki data store independen (in-memory).- Registrasi user baru dengan password hashing (bcrypt)- [Autentikasi dan Otorisasi](#autentikasi-dan-otorisasi)- [Overview](#overview)This repository contains two FastAPI microservices used for the TixGo final project:
 
-    │ Identity Service    │     │ Attendance Service   │#### 2. User Registration
 
-    │ (dina.*.my.id)      │     │ (ratu.*.my.id)       │```http
 
-    │                     │     │                      │POST /auth/register
+## Persyaratan Deployment- Login dan token generation (JWT HS256)
 
-    │ • Register User     │     │ • Create Check-in    │Content-Type: application/json
 
-    │ • Login (JWT)       │     │ • Get Attendance     │
 
-    │ • Get User Info     │     │ • Verify JWT Token   │{
+**Hardware & Software:**- Verifikasi identitas user melalui endpoint `/me`- [Testing](#testing)
 
-    │                     │     │                      │  "username": "string (min 3, max 50)",
+- Docker & Docker Compose v2.0 atau lebih baru
 
-    └─────────────────────┘     └──────────────────────┘  "password": "string (min 4, max 200 bytes)",
+- Git untuk clone repository- Manajemen role berbasis (committee, admin)
 
-           │                              │  "role": "string (committee|admin)"
+- Minimal 2GB RAM untuk menjalankan 2 containers
 
-           │  FastAPI App                │  FastAPI App}
+- Minimal 500MB disk space- [Troubleshooting](#troubleshooting)- [Arsitektur Sistem](#arsitektur-sistem)
 
-           │  (Container Port 8000)      │  (Container Port 8000)```
+- Network: port 18081 dan 18082 harus accessible
 
-           │                              │**Response:** `200 OK`
+### 2. Attendance Service (Port 18082)
 
-    ┌──────▼─────────────┐     ┌────────▼──────────────┐```json
+**Verifikasi Prerequisites:**
 
-    │  Docker Container   │     │  Docker Container    │{
 
-    │  (Python 3.11)      │     │  (Python 3.11)       │  "username": "panitia1",
 
-    │  tixgo-identity     │     │  tixgo-attendance    │  "role": "committee"
+```bash
 
-    └─────────────────────┘     └──────────────────────┘}
+docker --versionMenangani check-in peserta dan pencatatan kehadiran:
 
-``````
+docker-compose --version
 
-
-
----#### 3. User Login
-
-```http
-
-## Persyaratan DeploymentPOST /auth/login
-
-Content-Type: application/json
-
-### Hardware & Software
-
-- **Docker & Docker Compose**: v2.0 atau lebih baru{
-
-- **Git**: untuk clone repository  "username": "panitia1",
-
-- **Memory**: minimal 2GB RAM  "password": "secret"
-
-- **Disk Space**: minimal 500MB (untuk image + containers)}
-
-- **Network**: port 18081 dan 18082 harus accessible```
-
-**Response:** `200 OK`
-
-### Pre-requisites```json
-
-```bash{
-
-# Verify Docker installed  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-
-docker --version  "token_type": "bearer"
-
-docker-compose --version}
+git --version## Overview- [Persyaratan Deployment](#persyaratan-deployment)## 📋 Daftar Isi
 
 ```
 
-# Verify Git installed
+- Check-in peserta ke event dengan validasi token
 
-git --version#### 4. Get Current User Info
+## Panduan Deployment
 
-``````http
+- Pencatatan kehadiran per event dengan timestamp
 
-GET /auth/me
+### Step 1: Clone Repository
 
----Authorization: Bearer <TOKEN>
+- Query data kehadiran dengan filter event
+
+```bash
+
+cd /home/user- Validasi token dari Identity ServiceTixGo Microservices terdiri dari dua layanan independen:- [Panduan Deployment](#panduan-deployment)
+
+git clone https://github.com/ratukhansaaaa/tixgo-microservices.git
+
+cd tixgo-microservices
 
 ```
 
-## Panduan Deployment di STB**Response:** `200 OK`
+### Tech Stack
+
+### Step 2: Setup Environment Variables
+
+
+
+Buat file `.env` lokal dengan secrets yang aman (jangan commit ke git):
+
+- FastAPI 0.115.6 (ASGI Web Framework)**1. Identity Service (Port 18081)**- [Cara Mengakses Layanan](#cara-mengakses-layanan)- **identity-service**: authentication & authorization (register, login, me, role-based access)
+
+```bash
+
+cp .env.example .env- Python 3.11 (Runtime)
+
+nano .env
+
+```- Docker dan Docker Compose (Containerization)- Registrasi user baru
+
+
+
+Isi `.env`:- JWT Authentication (HS256 algorithm)
+
+
+
+```env- bcrypt (Password hashing)- Login dan token generation (JWT)- [Dokumentasi API](#dokumentasi-api)
+
+JWT_SECRET=<random-string-min-32-karakter>
+
+JWT_ALG=HS256- In-memory data store (development/testing)
+
+TOKEN_EXPIRE_MINUTES=120
+
+```- Verifikasi identitas user
+
+
+
+Generate JWT_SECRET yang aman:## Arsitektur Sistem
+
+
+
+```bash- Manajemen role (committee, admin)- [Autentikasi dan Otorisasi](#autentikasi-dan-otorisasi)- [Overview](#overview)- **attendance-service**: check-in management (create checkin, fetch attendance per event)
+
+# Menggunakan OpenSSL
+
+openssl rand -hex 32```
+
+
+
+# Atau menggunakan Python┌─────────────────────────────────────────────────────────────┐
+
+python3 -c "import secrets; print(secrets.token_hex(32))"
+
+```│                    Public Internet / STB                     │
+
+
+
+### Step 3: Build dan Deploy Services│             (Diakses via domain atau IP publik)             │**2. Attendance Service (Port 18082)**- [Testing](#testing)
+
+
+
+```bash└──────────────────────────┬──────────────────────────────────┘
+
+# Build images
+
+docker-compose build- Check-in peserta ke event
+
+
+
+# Start services di background                           │
+
+docker-compose -f docker-compose.prod.yml up -d
+
+- Pencatatan kehadiran per event- [Troubleshooting](#troubleshooting)- [Arsitektur Sistem](#arsitektur-sistem)
+
+# Atau gunakan deploy script
+
+chmod +x deploy.sh            ┌──────────────┴──────────────┐
+
+./deploy.sh
+
+```- Query data kehadiran dengan filter event
+
+
+
+### Step 4: Verifikasi Deployment            │                             │
+
+
+
+Check container status:- Validasi token dari Identity Service
+
+
+
+```bash       Port 18081                   Port 18082
+
+docker ps
+
+```
+
+
+
+Expected output:            │                             │
+
+
+
+```Stack teknologi: FastAPI 0.115.6, Python 3.11, Docker, JWT Authentication (HS256), In-memory data store.## Overview- [Persyaratan Deployment](#persyaratan-deployment)## Architecture Overview
+
+CONTAINER ID   IMAGE                     STATUS           PORTS
+
+xxxxx          tixgo-identity            Up 2 minutes     0.0.0.0:18081->8000/tcp    ┌───────▼─────────────┐     ┌────────▼─────────────┐
+
+xxxxx          tixgo-attendance          Up 2 minutes     0.0.0.0:18082->8000/tcp
+
+```
+
+
+
+Health check endpoints:    │ Identity Service    │     │ Attendance Service   │
+
+
+
+```bash## Arsitektur Sistem
+
+curl http://localhost:18081/health
+
+curl http://localhost:18082/health    │                     │     │                      │
+
+```
+
+
+
+Expected response:
+
+    │ • Register User     │     │ • Create Check-in    │
 
 ```json
 
-### Step 1: Clone Repository{
+{"status": "ok", "service": "identity-service"}```TixGo Microservices terdiri dari dua layanan independen:- [Panduan Deployment di STB](#panduan-deployment-di-stb)
 
-```bash  "username": "panitia1",
+{"status": "ok", "service": "attendance"}
 
-cd /home/user  "role": "committee"
+```    │ • Login (JWT)       │     │ • Get Attendance     │
 
-git clone https://github.com/ratukhansaaaa/tixgo-microservices.git}
 
-cd tixgo-microservices```
+
+## Cara Mengakses Layanan┌─────────────────────────────────────────────────────────────┐
+
+
+
+### A. Akses Lokal (Di STB)    │ • Get User Info     │     │ • Verify JWT Token   │
+
+
+
+Testing langsung di machine yang menjalankan Docker:│                    Public Internet / STB                     │
+
+
+
+```bash    └─────────────────────┘     └──────────────────────┘
+
+# Identity Service
+
+curl http://localhost:18081/health│             (Diakses via domain atau IP publik)             │
+
+curl http://localhost:18081/auth/register
+
+curl http://localhost:18081/auth/login            │                              │
+
+
+
+# Attendance Service└──────────────────────────┬──────────────────────────────────┘**1. Identity Service (Port 18081)**- [Cara Mengakses Layanan](#cara-mengakses-layanan)```
+
+curl http://localhost:18082/health
+
+curl http://localhost:18082/checkins            │  FastAPI App                │  FastAPI App
+
+```
+
+                           │
+
+### B. Akses via IP Address (Network)
+
+            │  (Container Port 8000)      │  (Container Port 8000)
+
+Dari machine lain di network yang sama (replace `<STB_IP>` dengan IP address STB):
+
+            ┌──────────────┴──────────────┐- Registrasi user baru
+
+```bash
+
+# Identity Service            │                              │
+
+curl http://<STB_IP>:18081/health
+
+            │                             │
+
+# Attendance Service
+
+curl http://<STB_IP>:18082/health            ↓                              ↓
+
+```
+
+       Port 18081                   Port 18082- Login dan token generation (JWT)- [Dokumentasi API](#dokumentasi-api)┌─────────────────────────────────────────────────────────────┐
+
+### C. Akses via Domain Publik
+
+    ┌──────▼─────────────┐     ┌────────▼──────────────┐
+
+Setelah domain publik dikonfigurasi via reverse proxy atau Cloudflare Tunnel:
+
+            │                             │
+
+```bash
+
+# Identity Service    │  Docker Container   │     │  Docker Container    │
+
+curl https://<identity-domain>/health
+
+curl https://<identity-domain>/auth/login    ┌───────▼─────────────┐     ┌────────▼─────────────┐- Verifikasi identitas user
+
+
+
+# Attendance Service    │  (Python 3.11)      │     │  (Python 3.11)       │
+
+curl https://<attendance-domain>/health
+
+curl https://<attendance-domain>/checkins    │ Identity Service    │     │ Attendance Service   │
+
+```
+
+    └─────────────────────┘     └──────────────────────┘
+
+Domain mapping:
+
+- Identity Service: `<identity-domain>` → `<STB_IP>:18081`    │                     │     │                      │- Manajemen role (committee, admin)- [Autentikasi & Otorisasi](#autentikasi--otorisasi)│                    Public Internet / STB                     │
+
+- Attendance Service: `<attendance-domain>` → `<STB_IP>:18082`
+
+        Port 18081                     Port 18082
+
+## Dokumentasi API
+
+    │ • Register User     │     │ • Create Check-in    │
+
+### Identity Service (Port 18081)
+
+            ↓                              ↓
+
+#### 1. Health Check
+
+    │ • Login (JWT)       │     │ • Get Attendance     │
+
+**Endpoint:** `GET /health`
+
+    ┌──────────────────┐        ┌──────────────────┐
+
+```bash
+
+curl http://localhost:18081/health    │ • Get User Info     │     │ • Verify JWT Token   │
+
+```
+
+    │ Identity Service │        │Attendance Service│
+
+Response:
+
+```json    └─────────────────────┘     └──────────────────────┘**2. Attendance Service (Port 18082)**- [Testing](#testing)└─────────────────────────────────────────────────────────────┘
+
+{"status": "ok", "service": "identity-service"}
+
+```    │   (FastAPI)      │        │   (FastAPI)      │
+
+
+
+#### 2. User Registration           │                              │
+
+
+
+**Endpoint:** `POST /auth/register`    │ • Register       │        │ • Create Checkin │
+
+
+
+```bash           │  FastAPI App                │  FastAPI App- Check-in peserta ke event
+
+curl -X POST http://localhost:18081/auth/register \
+
+  -H "Content-Type: application/json" \    │ • Login (JWT)    │        │ • Get Attendance │
+
+  -d '{
+
+    "username": "panitia1",           │  (Container Port 8000)      │  (Container Port 8000)
+
+    "password": "secret",
+
+    "role": "committee"    │ • /me endpoint   │        │ • Authorization  │
+
+  }'
+
+```           │                              │- Pencatatan kehadiran per event- [Troubleshooting](#troubleshooting)              ↓                              ↓
+
+
+
+Parameters:    └──────────────────┘        └──────────────────┘
+
+- `username` (string): min 3, max 50 karakter
+
+- `password` (string): min 4, max 200 karakter```    ┌──────▼─────────────┐     ┌────────▼──────────────┐
+
+- `role` (string): `committee` atau `admin`
+
+
+
+Response (200 OK):
+
+```json## Persyaratan Deployment    │  Docker Container   │     │  Docker Container    │- Query data kehadiran dengan filter event
+
+{
+
+  "username": "panitia1",
+
+  "role": "committee"
+
+}### Hardware & Software    │  (Python 3.11)      │     │  (Python 3.11)       │
+
+```
+
+
+
+Error (400 - User sudah ada):
+
+```json- **Docker & Docker Compose**: v2.0 atau lebih baru    └─────────────────────┘     └──────────────────────┘- Validasi token dari Identity Service        Port 18081                     Port 18082
+
+{"detail": "User panitia1 sudah terdaftar"}
+
+```- **Git**: untuk clone repository
+
+
+
+#### 3. User Login- **Memory**: minimal 2GB RAM untuk menjalankan 2 containers```
+
+
+
+**Endpoint:** `POST /auth/login`- **Disk Space**: minimal 500MB untuk images dan containers
+
+
+
+```bash- **Network**: port 18081 dan 18082 harus accessible
+
+curl -X POST http://localhost:18081/auth/login \
+
+  -H "Content-Type: application/json" \
+
+  -d '{"username":"panitia1","password":"secret"}'
+
+```### Verifikasi Prerequisites## Persyaratan Deployment
+
+
+
+Parameters:
+
+- `username` (string): min 3, max 50
+
+- `password` (string): min 4, max 200Jalankan command berikut untuk memastikan semua tools tersedia:Stack teknologi: FastAPI 0.115.6, Python 3.11, Docker, JWT Authentication (HS256), In-memory data store.---              ↓                              ↓
+
+
+
+Response (200 OK):
+
+```json
+
+{```bash### Hardware & Software
+
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
+  "token_type": "bearer"docker --version
+
+}
+
+```docker-compose --version
+
+
+
+Save token untuk request berikutnya:git --version
+
+
+
+```bash```- Docker dan Docker Compose v2.0 atau lebih baru
+
+TOKEN=$(curl -s -X POST http://localhost:18081/auth/login \
+
+  -H "Content-Type: application/json" \
+
+  -d '{"username":"panitia1","password":"secret"}' | jq -r .access_token)
+
+```## Panduan Deployment- Git untuk clone repository## Arsitektur Sistem    ┌──────────────────┐        ┌──────────────────┐
+
+
+
+#### 4. Get Current User Info
+
+
+
+**Endpoint:** `GET /auth/me`### Step 1: Clone Repository- Minimal 2GB RAM untuk menjalankan 2 containers
+
+
+
+```bash
+
+curl -H "Authorization: Bearer $TOKEN" http://localhost:18081/auth/me
+
+``````bash- Minimal 500MB disk space
+
+
+
+Response (200 OK):cd /home/user
+
+```json
+
+{git clone https://github.com/ratukhansaaaa/tixgo-microservices.git- Network: port 18081 dan 18082 harus accessible
+
+  "username": "panitia1",
+
+  "role": "committee"cd tixgo-microservices
+
+}
+
+`````````## Overview    │ Identity Service │        │Attendance Service│
+
+
+
+### Attendance Service (Port 18082)
+
+
+
+#### 1. Health Check### Step 2: Setup Environment Variables### Verifikasi Prerequisites
+
+
+
+**Endpoint:** `GET /health`
+
+
+
+```bashJangan commit `.env` ke repository. Buat file `.env` lokal dengan secrets yang aman.┌─────────────────────────────────────────────────────────────┐
+
+curl http://localhost:18082/health
+
+```
+
+
+
+Response:```bash```bash
+
+```json
+
+{"status": "ok", "service": "attendance"}cp .env.example .env
+
+```
+
+nano .envdocker --version│                    Public Internet / STB                     │    │   (FastAPI)      │        │   (FastAPI)      │
+
+#### 2. Create Check-in
+
+```
+
+**Endpoint:** `POST /checkins`
+
+docker-compose --version
+
+Requires Bearer token.
+
+Isi `.env` dengan nilai yang diperlukan:
+
+```bash
+
+curl -X POST http://localhost:18082/checkins \git --version│             (Diakses via domain atau IP publik)             │
+
+  -H "Content-Type: application/json" \
+
+  -H "Authorization: Bearer $TOKEN" \```env
+
+  -d '{"event_id":"evt1","ticket_id":"TICKET123"}'
+
+```JWT_SECRET=<random-string-min-32-karakter>```
+
+
+
+Parameters:JWT_ALG=HS256
+
+- `event_id` (string): identitas event
+
+- `ticket_id` (string): identitas ticket pesertaTOKEN_EXPIRE_MINUTES=120└──────────────────────────┬──────────────────────────────────┘**TixGo Microservices** terdiri dari dua layanan independen yang dirancang untuk menangani aspek berbeda dari sistem manajemen event:    │                  │        │                  │
+
+
+
+Response (201 Created):```
+
+```json
+
+{## Panduan Deployment
+
+  "status": "checked_in",
+
+  "record": {Generate JWT_SECRET yang aman:
+
+    "event_id": "evt1",
+
+    "ticket_id": "TICKET123",                           │
+
+    "checked_in_by": "panitia1",
+
+    "checked_in_at": "2026-01-03T13:25:53.415880+00:00"```bash
+
+  }
+
+}# Menggunakan OpenSSL### Step 1: Clone Repository
+
+```
+
+openssl rand -hex 32
+
+Error (400 - Duplicate):
+
+```json            ┌──────────────┴──────────────┐    │ • Register       │        │ • Create Checkin │
+
+{"detail": "Ticket sudah pernah check-in"}
+
+```# Atau menggunakan Python
+
+
+
+#### 3. Get Attendance by Eventpython3 -c "import secrets; print(secrets.token_hex(32))"```bash
+
+
+
+**Endpoint:** `GET /attendance/{event_id}````
+
+
+
+Requires Bearer token.cd /home/user            │                             │
+
+
+
+```bash### Step 3: Build dan Deploy Services
+
+curl -H "Authorization: Bearer $TOKEN" http://localhost:18082/attendance/evt1
+
+```git clone https://github.com/ratukhansaaaa/tixgo-microservices.git
+
+
+
+Response (200 OK):```bash
+
+```json
+
+{# Build imagescd tixgo-microservices       Port 18081                   Port 18082### 1. **Identity Service** (Port 18081)    │ • Login (JWT)    │        │ • Get Attendance │
+
+  "event_id": "evt1",
+
+  "total_checkins": 2,docker-compose build
+
+  "records": [
+
+    {```
+
+      "ticket_id": "TICKET123",
+
+      "checked_in_by": "panitia1",# Start services di background
+
+      "checked_in_at": "2026-01-03T13:25:53.415880+00:00"
+
+    },docker-compose -f docker-compose.prod.yml up -d            │                             │
+
+    {
+
+      "ticket_id": "TICKET456",
+
+      "checked_in_by": "panitia1",
+
+      "checked_in_at": "2026-01-03T13:26:20.123456+00:00"# Atau gunakan deploy script### Step 2: Setup Environment Variables
+
+    }
+
+  ]chmod +x deploy.sh
+
+}
+
+```./deploy.sh    ┌───────▼─────────────┐     ┌────────▼─────────────┐Menangani:    │ • /me endpoint   │        │ • Authorization  │
+
+
+
+## Autentikasi dan Otorisasi```
+
+
+
+### JWT Token FormatJangan commit `.env` ke repository. Buat file `.env` lokal dengan secrets yang aman.
+
+
+
+Semua endpoint (kecuali `/health`, `/auth/register`, `/auth/login`) memerlukan Bearer token:### Step 4: Verifikasi Deployment
+
+
+
+```    │ Identity Service    │     │ Attendance Service   │
+
+Authorization: Bearer <access_token>
+
+```Check container status:
+
+
+
+Token adalah JWT yang di-sign dengan HS256. Payload berisi:```bash
+
+- `sub` (subject): username user
+
+- `role`: committee atau admin```bash
+
+- `iat` (issued at): waktu token dibuat
+
+- `exp` (expiration): waktu token kadaluarsadocker pscp .env.example .env    │                     │     │                      │- Registrasi user baru    └──────────────────┘        └──────────────────┘
+
+
+
+### Token Lifetime```
+
+
+
+Token berlaku 120 menit (2 jam). Setelah expired, user harus login ulang.nano .env
+
+
+
+### Role-Based AccessExpected output:
+
+
+
+Saat ini semua endpoint yang memerlukan autentikasi dapat diakses oleh user dengan role apapun (committee atau admin).```    │ • Register User     │     │ • Create Check-in    │
+
+
+
+### Password Requirements```
+
+
+
+- Minimum 4 karakterCONTAINER ID   IMAGE                     STATUS           PORTS
+
+- Maximum 200 karakter (bcrypt limit 72 bytes)
+
+- Di-hash dengan bcrypt (salt 12 rounds)xxxxx          tixgo-identity            Up 2 minutes     0.0.0.0:18081->8000/tcp
+
+
+
+## Testingxxxxx          tixgo-attendance          Up 2 minutes     0.0.0.0:18082->8000/tcpIsi `.env` dengan nilai yang diperlukan:    │ • Login (JWT)       │     │ • Get Attendance     │- Login dan token generation (JWT)         8000/tcp                      8000/tcp
+
+
+
+### Automated Testing (smoke-test.sh)```
+
+
+
+Script untuk end-to-end testing:
+
+
+
+```bashHealth check endpoints:
+
+chmod +x smoke-test.sh
+
+./smoke-test.sh```env    │ • Get User Info     │     │ • Verify JWT Token   │
+
+```
+
+```bash
+
+Script akan:
+
+1. Test health endpoints (Identity + Attendance)curl http://localhost:18081/healthJWT_SECRET=<random-string-min-32-karakter>
+
+2. Register user baru
+
+3. Login dan extract tokencurl http://localhost:18082/health
+
+4. Test GET /auth/me
+
+5. Create check-in```JWT_ALG=HS256    └─────────────────────┘     └──────────────────────┘- Verifikasi identitas user              ↓                              ↓
+
+6. Get attendance data
+
+7. Verify error handling
+
+
+
+Expected: Semua test passed (7/7)Expected response:TOKEN_EXPIRE_MINUTES=120
+
+
+
+### Manual Testing
+
+
+
+Complete workflow:```json```           │                              │
+
+
+
+```bash{"status": "ok", "service": "identity-service"}
+
+# 1. Register user
+
+curl -X POST http://localhost:18081/auth/register \{"status": "ok", "service": "attendance"}
+
+  -H "Content-Type: application/json" \
+
+  -d '{"username":"testuser","password":"password123","role":"committee"}'```
+
+
+
+# 2. LoginGenerate JWT_SECRET yang aman:           │  FastAPI App                │  FastAPI App- Manajemen role (committee, admin)    ┌──────────────────┐        ┌──────────────────┐
+
+curl -X POST http://localhost:18081/auth/login \
+
+  -H "Content-Type: application/json" \## Cara Mengakses Layanan
+
+  -d '{"username":"testuser","password":"password123"}'
+
+
+
+# 3. Save token
+
+TOKEN="<token-dari-login>"### A. Akses Lokal (Di STB)
+
+
+
+# 4. Get user info```bash           │  (Container Port 8000)      │  (Container Port 8000)
+
+curl -H "Authorization: Bearer $TOKEN" http://localhost:18081/auth/me
+
+Jika test langsung di machine yang menjalankan Docker:
+
+# 5. Create check-in
+
+curl -X POST http://localhost:18082/checkins \# Menggunakan OpenSSL
+
+  -H "Content-Type: application/json" \
+
+  -H "Authorization: Bearer $TOKEN" \```bash
+
+  -d '{"event_id":"evt1","ticket_id":"TICKET001"}'
+
+# Identity Serviceopenssl rand -hex 32           │                              │    │   Container      │        │   Container      │
+
+# 6. Get attendance
+
+curl -H "Authorization: Bearer $TOKEN" http://localhost:18082/attendance/evt1curl http://localhost:18081/health
+
+```
+
+curl http://localhost:18081/auth/register
+
+## Troubleshooting
+
+curl http://localhost:18081/auth/login
+
+### Port sudah digunakan
+
+# Atau menggunakan Python    ┌──────▼─────────────┐     ┌────────▼──────────────┐
+
+Error: `Ports are not available`
+
+# Attendance Service
+
+Solusi:
+
+curl http://localhost:18082/healthpython3 -c "import secrets; print(secrets.token_hex(32))"
+
+```bash
+
+# Cek port yang digunakancurl http://localhost:18082/checkins
+
+lsof -i :18081
+
+lsof -i :18082``````    │  Docker Container   │     │  Docker Container    │### 2. **Attendance Service** (Port 18082)    │ (Python 3.11)    │        │ (Python 3.11)    │
+
+
+
+# Kill process
+
+kill -9 <PID>
+
+### B. Akses via IP Address (Network)
+
+# Atau ubah port di docker-compose.yml
+
+```
+
+
+
+### JWT_SECRET tidak ditemukanJika diakses dari machine lain di network yang sama, replace `<STB_IP>` dengan IP address STB:### Step 3: Build dan Deploy Services    │  (Python 3.11)      │     │  (Python 3.11)       │
+
+
+
+Error: `KeyError: 'JWT_SECRET'`
+
+
+
+Solusi:```bash
+
+
+
+```bash# Identity Service
+
+# Buat .env dari template
+
+cp .env.example .envcurl http://<STB_IP>:18081/health```bash    └─────────────────────┘     └──────────────────────┘Menangani:    └──────────────────┘        └──────────────────┘
+
+
+
+# Generate secret baru
+
+openssl rand -hex 32
+
+# Attendance Service# Build images
+
+# Edit .env
+
+nano .envcurl http://<STB_IP>:18082/health
+
+```
+
+```docker-compose build```
+
+### Login gagal
+
+
+
+Error: `Incorrect username or password`
+
+### C. Akses via Domain Publik
+
+Solusi:
+
+1. Verifikasi username dan password benar (case-sensitive)
+
+2. Pastikan user sudah di-register
+
+3. Check Docker logs:Ketika domain publik sudah dikonfigurasi via reverse proxy atau Cloudflare Tunnel:# Start services di background- Check-in peserta ke event```
+
+
+
+```bash
+
+docker logs tixgo-identity
+
+docker logs tixgo-attendance```bashdocker-compose -f docker-compose.prod.yml up -d
+
+```
+
+# Identity Service
+
+### Token validation error
+
+curl https://<identity-domain>/health## Persyaratan Deployment
+
+Error: `Could not validate credentials`
+
+curl https://<identity-domain>/auth/login
+
+Solusi:
+
+1. Pastikan token belum expired (valid 120 menit)# Atau gunakan deploy script
+
+2. Verifikasi format header: `Bearer <token>`
+
+3. Pastikan kedua services menggunakan JWT_SECRET yang sama# Attendance Service
+
+
+
+### Check-in duplicate errorcurl https://<attendance-domain>/healthchmod +x deploy.sh- Pencatatan kehadiran per event
+
+
+
+Error: `Ticket sudah pernah check-in`curl https://<attendance-domain>/checkins
+
+
+
+Solusi:```./deploy.sh
+
+1. Ini adalah expected behavior (prevent duplicate)
+
+2. Gunakan ticket_id yang berbeda
+
+3. Atau gunakan event_id yang berbeda
+
+Domain mapping (sesuaikan dengan setup Anda):```### Hardware & Software
+
+### Container tidak start
+
+
+
+Error: `Error starting service`
+
+- Identity Service: `<identity-domain>` → `<STB_IP>:18081`
+
+Solusi:
+
+- Attendance Service: `<attendance-domain>` → `<STB_IP>:18082`
+
+```bash
+
+# Check logs### Step 4: Verifikasi Deployment- Query data kehadiran dengan filter event## Deployment Files
+
+docker-compose logs -f
+
+## Dokumentasi API
+
+# Verifikasi .env ada
+
+cat .env
+
+
+
+# Rebuild### Identity Service (Port 18081)
+
+docker-compose down
+
+docker-compose build --no-cacheCheck container status:- Docker dan Docker Compose v2.0 atau lebih baru
+
+docker-compose up -d
+
+```#### 1. Health Check
+
+
+
+### Network connectivity issue
+
+
+
+Jika tidak bisa akses via domain publik:**Endpoint:** `GET /health`
+
+
+
+1. Verifikasi DNS pointing ke STB IP```bash- Git untuk clone repository- Validasi token dari Identity Service
+
+2. Check firewall (port 18081, 18082 harus open)
+
+3. Verifikasi Cloudflare Tunnel configAuthentication: Tidak diperlukan
+
+4. Test DNS:
+
+docker ps
+
+```bash
+
+nslookup <identity-domain>```bash
+
+nslookup <attendance-domain>
+
+```curl http://localhost:18081/health```- Minimal 2GB RAM untuk menjalankan 2 containers
+
+
+
+### Memory usage tinggi```
+
+
+
+Solusi:
+
+
+
+```bashResponse (200 OK):
+
+# Limit resources di docker-compose.prod.yml
+
+services:Expected output:- Minimal 500MB disk space- `docker-compose.yml` — development compose file
+
+  identity-service:
+
+    deploy:```json
+
+      resources:
+
+        limits:{```
+
+          memory: 512M
+
+          cpus: '0.5'  "status": "ok",
+
+```
+
+  "service": "identity-service"CONTAINER ID   IMAGE                     STATUS           PORTS- Network: port 18081 dan 18082 harus accessible
+
+```bash
+
+# Restart containers}
+
+docker-compose restart
+
+``````xxxxx          tixgo-identity            Up 2 minutes     0.0.0.0:18081->8000/tcp
+
+
+
+### Data hilang setelah restart
+
+
+
+Ini adalah expected behavior (in-memory store). Untuk production, implementasikan database persistent (PostgreSQL, SQLite, MongoDB).#### 2. User Registrationxxxxx          tixgo-attendance          Up 2 minutes     0.0.0.0:18082->8000/tcp**Tech Stack:**- `docker-compose.prod.yml` — production-ready compose file with host ports mapped (18081/18082)
+
+
+
+## Repository Structure
+
+
+
+- `identity-service/app/main.py` — Identity service application**Endpoint:** `POST /auth/register````
+
+- `attendance-service/app/main.py` — Attendance service application
+
+- `docker-compose.yml` — Development compose file
+
+- `docker-compose.prod.yml` — Production-ready compose file
+
+- `deploy.sh` — Automated deployment scriptAuthentication: Tidak diperlukan### Verifikasi Prerequisites
+
+- `smoke-test.sh` — Quick verification script
+
+- `.env.example` — Environment variables template
+
+- `.env` — Actual secrets (NOT tracked in git)
+
+```bashHealth check endpoints:
+
+## Repository Links
+
+curl -X POST http://localhost:18081/auth/register \
+
+GitHub: https://github.com/ratukhansaaaa/tixgo-microservices
+
+  -H "Content-Type: application/json" \- FastAPI 0.115.6- `deploy.sh` — automated deployment script for STB
+
+Untuk informasi lebih lanjut atau kontribusi, silakan fork repository dan create pull request.
+
+  -d '{
+
+    "username": "panitia1",```bash
+
+    "password": "secret",
+
+    "role": "committee"curl http://localhost:18081/health```bash
+
+  }'
+
+```curl http://localhost:18082/health
+
+
+
+Request body parameters:```docker --version- Python 3.11- `smoke-test.sh` — quick verification/testing script
+
+
+
+- `username` (string): min 3, max 50 karakter
+
+- `password` (string): min 4, max 200 karakter
+
+- `role` (string): `committee` atau `admin`Expected response:docker-compose --version
+
+
+
+Response (200 OK):```json
+
+
+
+```json{"status": "ok", "service": "identity-service"}git --version- Docker & Docker Compose- `cloudflared/config.yml.example` — example Cloudflare Tunnel config 
+
+{
+
+  "username": "panitia1",{"status": "ok", "service": "attendance"}
+
+  "role": "committee"
+
+}``````
+
+```
+
+
+
+Error (400 - User sudah ada):
+
+## Cara Mengakses Layanan- JWT Authentication (HS256)- `.env.example` — environment variables template
+
+```json
+
+{
+
+  "detail": "User panitia1 sudah terdaftar"
+
+}### A. Akses Lokal (Di STB)## Panduan Deployment
+
+```
+
+
+
+#### 3. User Login
+
+Jika test langsung di machine yang menjalankan Docker:- In-memory data store
+
+**Endpoint:** `POST /auth/login`
+
+
+
+Authentication: Tidak diperlukan
+
+```bash### Step 1: Clone Repository
+
+```bash
+
+curl -X POST http://localhost:18081/auth/login \# Identity Service
+
+  -H "Content-Type: application/json" \
+
+  -d '{curl http://localhost:18081/health## API Endpoints Reference
+
+    "username": "panitia1",
+
+    "password": "secret"curl http://localhost:18081/auth/register
+
+  }'
+
+```curl http://localhost:18081/auth/login```bash
+
+
+
+Request body parameters:
+
+
+
+- `username` (string): min 3, max 50# Attendance Servicecd /home/user---
+
+- `password` (string): min 4, max 200
+
+curl http://localhost:18082/health
+
+Response (200 OK):
+
+curl http://localhost:18082/checkinsgit clone https://github.com/ratukhansaaaa/tixgo-microservices.git
+
+```json
+
+{```
+
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
+  "token_type": "bearer"cd tixgo-microservices### Identity Service (Port 18081)
+
+}
+
+```### B. Akses via IP Address (Network)
+
+
+
+Save token ke variable:```
+
+
+
+```bashJika diakses dari machine lain di network yang sama:
+
+TOKEN=$(curl -s -X POST http://localhost:18081/auth/login \
+
+  -H "Content-Type: application/json" \## Arsitektur Sistem
+
+  -d '{"username":"panitia1","password":"secret"}' | jq -r .access_token)
+
+```bash
+
+echo $TOKEN
+
+```# Replace <STB_IP> dengan IP address STB### Step 2: Setup Environment Variables
+
+
+
+#### 4. Get Current User Infocurl http://192.168.1.100:18081/health
+
+
+
+**Endpoint:** `GET /auth/me`curl http://192.168.1.100:18082/health#### 1. Health Check
+
+
+
+Authentication: Bearer Token Required```
+
+
+
+```bashJangan commit `.env` ke repository. Buat file `.env` lokal dengan secrets yang aman.
+
+curl -H "Authorization: Bearer $TOKEN" \
+
+  http://localhost:18081/auth/me### C. Akses via Domain Publik
+
+```
+
+``````http
+
+Response (200 OK):
+
+Ketika domain publik sudah dikonfigurasi via reverse proxy atau Cloudflare Tunnel:
+
+```json
+
+{```bash
+
+  "username": "panitia1",
+
+  "role": "committee"```bash
+
+}
+
+```# Identity Servicecp .env.example .env┌─────────────────────────────────────────────────────────────────┐GET /health
+
+
+
+Error (401 - Unauthorized):curl https://<identity-domain>/health
+
+
+
+```jsoncurl https://<identity-domain>/auth/loginnano .env
+
+{
+
+  "detail": "Could not validate credentials"
+
+}
+
+```# Attendance Service```│                    Public Internet / STB                         │```
+
+
+
+### Attendance Service (Port 18082)curl https://<attendance-domain>/health
+
+
+
+#### 1. Health Checkcurl https://<attendance-domain>/checkins
+
+
+
+**Endpoint:** `GET /health````
+
+
+
+Authentication: Tidak diperlukanIsi `.env` dengan nilai yang diperlukan:│             (Diakses via domain atau IP publik)                 │**Response:** `200 OK`
+
+
+
+```bashDomain mapping (sesuaikan dengan setup Anda):
+
+curl http://localhost:18082/health
+
+```- Identity Service: `<identity-domain>` → `STB_IP:18081`
+
+
+
+Response (200 OK):- Attendance Service: `<attendance-domain>` → `STB_IP:18082`
+
+
+
+```json```env└──────────────────────────┬──────────────────────────────────────┘```json
+
+{
+
+  "status": "ok",## Dokumentasi API
+
+  "service": "attendance"
+
+}JWT_SECRET=<random-string-min-32-karakter>
+
+```
+
+### Identity Service (Port 18081)
+
+#### 2. Create Check-in
+
+JWT_ALG=HS256                           │{
+
+**Endpoint:** `POST /checkins`
+
+#### 1. Health Check
+
+Authentication: Bearer Token Required
+
+TOKEN_EXPIRE_MINUTES=120
+
+```bash
+
+curl -X POST http://localhost:18082/checkins \**Endpoint:** `GET /health`
+
+  -H "Content-Type: application/json" \
+
+  -H "Authorization: Bearer $TOKEN" \```            ┌──────────────┴──────────────┐  "status": "ok",
+
+  -d '{
+
+    "event_id": "evt1",Authentication: Tidak diperlukan
+
+    "ticket_id": "TICKET123"
+
+  }'
+
+```
+
+Response (200 OK):
+
+Request body parameters:
+
+```jsonGenerate JWT_SECRET yang aman:            │                             │  "service": "identity-service"
+
+- `event_id` (string): identitas event
+
+- `ticket_id` (string): identitas ticket peserta{
+
+
+
+Response (201 Created):  "status": "ok",
+
+
+
+```json  "service": "identity-service"
+
+{
+
+  "status": "checked_in",}```bash       Port 18081                   Port 18082}
+
+  "record": {
+
+    "event_id": "evt1",```
+
+    "ticket_id": "TICKET123",
+
+    "checked_in_by": "panitia1",# Menggunakan OpenSSL
+
+    "checked_in_at": "2026-01-03T13:25:53.415880+00:00"
+
+  }#### 2. User Registration
+
+}
+
+```openssl rand -hex 32            │                             │```
+
+
+
+Error (400 - Duplicate check-in):**Endpoint:** `POST /auth/register`
+
+
+
+```json
+
+{
+
+  "detail": "Ticket sudah pernah check-in"Authentication: Tidak diperlukan
+
+}
+
+```# Atau menggunakan Python    ┌───────▼─────────────┐     ┌────────▼─────────────┐
+
+
+
+Error (401 - Unauthorized):Request body:
+
+
+
+```json```jsonpython3 -c "import secrets; print(secrets.token_hex(32))"
+
+{
+
+  "detail": "Could not validate credentials"{
+
+}
+
+```  "username": "string (min 3, max 50 karakter)",```    │ Identity Service    │     │ Attendance Service   │#### 2. User Registration
+
+
+
+#### 3. Get Attendance by Event  "password": "string (min 4, max 200 karakter)",
+
+
+
+**Endpoint:** `GET /attendance/{event_id}`  "role": "string (committee|admin)"
+
+
+
+Authentication: Bearer Token Required}
+
+
+
+```bash```### Step 3: Build dan Deploy Services    │ (dina.*.my.id)      │     │ (ratu.*.my.id)       │```http
+
+curl -H "Authorization: Bearer $TOKEN" \
+
+  http://localhost:18082/attendance/evt1
+
+```
+
+Response (200 OK):
+
+Response (200 OK):
+
+```json
+
+```json
+
+{{```bash    │                     │     │                      │POST /auth/register
+
+  "event_id": "evt1",
+
+  "total_checkins": 2,  "username": "panitia1",
+
+  "records": [
+
+    {  "role": "committee"# Build images
+
+      "ticket_id": "TICKET123",
+
+      "checked_in_by": "panitia1",}
+
+      "checked_in_at": "2026-01-03T13:25:53.415880+00:00"
+
+    },```docker-compose build    │ • Register User     │     │ • Create Check-in    │Content-Type: application/json
+
+    {
+
+      "ticket_id": "TICKET456",
+
+      "checked_in_by": "panitia1",
+
+      "checked_in_at": "2026-01-03T13:26:20.123456+00:00"Error (400 - User sudah ada):
+
+    }
+
+  ]```json
+
+}
+
+```{# Start services di background    │ • Login (JWT)       │     │ • Get Attendance     │
+
+
+
+Error (401 - Unauthorized):  "detail": "User panitia1 sudah terdaftar"
+
+
+
+```json}docker-compose -f docker-compose.prod.yml up -d
+
+{
+
+  "detail": "Could not validate credentials"```
+
+}
+
+```    │ • Get User Info     │     │ • Verify JWT Token   │{
+
+
+
+## Autentikasi dan Otorisasi#### 3. User Login
+
+
+
+### JWT Token Format# Atau gunakan deploy script
+
+
+
+Semua API endpoint (kecuali `/health`, `/auth/register`, `/auth/login`) memerlukan Bearer token di header:**Endpoint:** `POST /auth/login`
+
+
+
+```chmod +x deploy.sh    │                     │     │                      │  "username": "string (min 3, max 50)",
+
+Authorization: Bearer <access_token>
+
+```Authentication: Tidak diperlukan
+
+
+
+Token adalah JWT yang di-sign dengan HS256 algorithm. Payload token berisi informasi:./deploy.sh
+
+
+
+- `sub` (subject): username userRequest body:
+
+- `role`: committee atau admin
+
+- `iat` (issued at): timestamp token dibuat```json```    └─────────────────────┘     └──────────────────────┘  "password": "string (min 4, max 200 bytes)",
+
+- `exp` (expiration): timestamp token expired
+
+{
+
+### Token Expiration
+
+  "username": "panitia1",
+
+Token memiliki masa berlaku 120 menit (2 jam) dari waktu dibuat. Setelah expired, user harus login kembali untuk mendapatkan token baru.
+
+  "password": "secret"
+
+### Role-Based Access Control
+
+}### Step 4: Verifikasi Deployment           │                              │  "role": "string (committee|admin)"
+
+Saat ini, semua endpoint yang memerlukan autentikasi dapat diakses oleh user dengan role apapun (committee atau admin). Implementasi role-based authorization untuk endpoint tertentu dapat ditambahkan di fase development berikutnya.
+
+```
+
+### Password Requirements
+
+
+
+Password harus memenuhi kriteria berikut:
+
+Response (200 OK):
+
+- Minimum 4 karakter
+
+- Maximum 200 karakter (bcrypt limit 72 bytes)```jsonCheck container status:           │  FastAPI App                │  FastAPI App}
+
+- Disimpan dengan hash bcrypt (salt 12 rounds)
+
+{
+
+## Testing
+
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
+### Automated Testing (smoke-test.sh)
+
+  "token_type": "bearer"
+
+Script ini melakukan end-to-end testing untuk memastikan semua endpoint berfungsi dengan baik:
+
+}```bash           │  (Container Port 8000)      │  (Container Port 8000)```
+
+```bash
+
+chmod +x smoke-test.sh```
+
+./smoke-test.sh
+
+```docker ps
+
+
+
+Script akan melakukan:Curl example:
+
+
+
+1. Test health endpoints (Identity + Attendance)```bash```           │                              │**Response:** `200 OK`
+
+2. Register user baru
+
+3. Login dan extract tokenTOKEN=$(curl -s -X POST http://localhost:18081/auth/login \
+
+4. Test GET /auth/me
+
+5. Create check-in  -H "Content-Type: application/json" \
+
+6. Get attendance data
+
+7. Verify error handling (unauthorized, duplicate check-in)  -d '{"username":"panitia1","password":"secret"}' | jq -r .access_token)
+
+
+
+Expected output: Semua assertions passed (7/7)```Expected output:    ┌──────▼─────────────┐     ┌────────▼──────────────┐```json
+
+
+
+### Manual Testing
+
+
+
+Test dengan curl atau tools serupa:#### 4. Get Current User Info```
+
+
+
+```bash
+
+# 1. Register user
+
+curl -X POST http://localhost:18081/auth/register \**Endpoint:** `GET /auth/me`CONTAINER ID   IMAGE                     STATUS           PORTS    │  Docker Container   │     │  Docker Container    │{
+
+  -H "Content-Type: application/json" \
+
+  -d '{"username":"testuser","password":"password123","role":"committee"}'
+
+
+
+# 2. LoginAuthentication: Bearer Token Requiredxxxxx          tixgo-identity            Up 2 minutes     0.0.0.0:18081->8000/tcp
+
+curl -X POST http://localhost:18081/auth/login \
+
+  -H "Content-Type: application/json" \
+
+  -d '{"username":"testuser","password":"password123"}'
+
+Request header:xxxxx          tixgo-attendance          Up 2 minutes     0.0.0.0:18082->8000/tcp    │  (Python 3.11)      │     │  (Python 3.11)       │  "username": "panitia1",
+
+# 3. Save token
+
+TOKEN="<token-dari-response-login>"```
+
+
+
+# 4. Get user infoAuthorization: Bearer <access_token>```
+
+curl -H "Authorization: Bearer $TOKEN" \
+
+  http://localhost:18081/auth/me```
+
+
+
+# 5. Create check-in    │  tixgo-identity     │     │  tixgo-attendance    │  "role": "committee"
+
+curl -X POST http://localhost:18082/checkins \
+
+  -H "Content-Type: application/json" \Response (200 OK):
+
+  -H "Authorization: Bearer $TOKEN" \
+
+  -d '{"event_id":"evt1","ticket_id":"TICKET001"}'```jsonHealth check endpoints:
+
+
+
+# 6. Get attendance{
+
+curl -H "Authorization: Bearer $TOKEN" \
+
+  http://localhost:18082/attendance/evt1  "username": "panitia1",    └─────────────────────┘     └──────────────────────┘}
+
+```
+
+  "role": "committee"
+
+## Troubleshooting
+
+}```bash
+
+### Port sudah digunakan (Address already in use)
+
+```
+
+Error: `docker-compose: Error response from daemon: Ports are not available`
+
+curl http://localhost:18081/health``````
+
+Solusi:
+
+Curl example:
+
+```bash
+
+# Cek port yang sedang digunakan```bashcurl http://localhost:18082/health
+
+lsof -i :18081
+
+lsof -i :18082curl -H "Authorization: Bearer $TOKEN" \
+
+
+
+# Kill process yang menggunakan port  http://localhost:18081/auth/me```
+
+kill -9 <PID>
+
+```
+
+# Atau ubah port di docker-compose.yml
+
+# Ganti "18081:8000" menjadi "18083:8000" (gunakan port yang available)
 
 ```
 
 ### Attendance Service (Port 18082)
 
-### Step 2: Setup Environment Variables
+### JWT_SECRET tidak ditemukan
+
+Expected response:---#### 3. User Login
+
+Error: `KeyError: 'JWT_SECRET'`
 
 #### 1. Health Check
 
-**PENTING:** Jangan commit `.env` ke repository. Buat file `.env` lokal dengan secrets yang aman.```http
+Solusi:
 
-GET /health
+```json
 
-```bash```
+```bash
 
-# Copy template**Response:** `200 OK`
+# Pastikan .env file ada dan berisi JWT_SECRET**Endpoint:** `GET /health`
 
-cp .env.example .env```json
+cat .env
+
+{"status": "ok", "service": "identity-service"}```http
+
+# Jika belum ada, buat dari .env.example
+
+cp .env.example .envAuthentication: Tidak diperlukan
+
+
+
+# Generate JWT_SECRET baru{"status": "ok", "service": "attendance"}
+
+openssl rand -hex 32
+
+Response (200 OK):
+
+# Update .env dengan JWT_SECRET
+
+nano .env```json```## Persyaratan DeploymentPOST /auth/login
+
+```
 
 {
 
-# Edit dengan editor pilihan  "status": "ok",
+### Login gagal (Invalid credentials)
 
-nano .env  "service": "attendance"
+  "status": "ok",
 
-```}
+Error: `detail: "Incorrect username or password"`
+
+  "service": "attendance"
+
+Solusi:
+
+}## Cara Mengakses LayananContent-Type: application/json
+
+1. Verifikasi username dan password sudah benar (case-sensitive)
+
+2. Pastikan user sudah di-register terlebih dahulu```
+
+3. Check Docker logs:
+
+
+
+```bash
+
+docker logs tixgo-identity#### 2. Create Check-in
+
+docker logs tixgo-attendance
+
+```### A. Akses Lokal (Di STB)### Hardware & Software
+
+
+
+### Token validation error**Endpoint:** `POST /checkins`
+
+
+
+Error: `detail: "Could not validate credentials"` pada endpoint Attendance Service
+
+
+
+Solusi:Authentication: Bearer Token Required
+
+
+
+1. Pastikan token masih berlaku (expired setelah 120 menit)Jika test langsung di machine yang menjalankan Docker:- **Docker & Docker Compose**: v2.0 atau lebih baru{
+
+2. Verifikasi Authorization header format: `Bearer <token>`
+
+3. Pastikan kedua services menggunakan JWT_SECRET yang sama di `.env`Request header:
+
+
+
+### Check-in duplicate error```
+
+
+
+Error: `detail: "Ticket sudah pernah check-in"`Authorization: Bearer <access_token>
+
+
+
+Solusi:Content-Type: application/json```bash- **Git**: untuk clone repository  "username": "panitia1",
+
+
+
+1. Ini adalah expected behavior (duplicate prevention)```
+
+2. Gunakan ticket_id yang berbeda untuk check-in baru
+
+3. Atau gunakan event_id yang berbeda# Identity Service
+
+
+
+### Container tidak startRequest body:
+
+
+
+Error: `docker-compose: Error starting service````jsoncurl http://localhost:18081/health- **Memory**: minimal 2GB RAM  "password": "secret"
+
+
+
+Solusi:{
+
+
+
+1. Check Docker logs:  "event_id": "evt1",curl http://localhost:18081/auth/register
+
+
+
+```bash  "ticket_id": "TICKET123"
+
+docker-compose logs -f
+
+```}curl http://localhost:18081/auth/login- **Disk Space**: minimal 500MB (untuk image + containers)}
+
+
+
+2. Verifikasi `.env` file sudah ada dan valid:```
+
+
+
+```bash
+
+cat .env
+
+# Pastikan JWT_SECRET tidak kosongResponse (201 Created):
 
 ```
 
-**Isi `.env` (REQUIRED):**
+```json# Attendance Service- **Network**: port 18081 dan 18082 harus accessible```
 
-```env#### 2. Create Check-in
+3. Rebuild images:
 
-JWT_SECRET=<random-string-32-karakter-atau-lebih>```http
+{
 
-JWT_ALG=HS256POST /checkins
+```bash
 
-TOKEN_EXPIRE_MINUTES=120Content-Type: application/json
+docker-compose down  "status": "checked_in",curl http://localhost:18082/health
 
-```Authorization: Bearer <TOKEN>
+docker-compose build --no-cache
 
-
-
-**Generate JWT_SECRET yang aman:**{
-
-```bash  "event_id": "evt1",
-
-# Menggunakan OpenSSL  "ticket_id": "TICKET123"
-
-openssl rand -hex 32}
+docker-compose up -d  "record": {
 
 ```
 
-# ATAU menggunakan Python**Response:** `201 Created`
+    "event_id": "evt1",curl http://localhost:18082/checkins**Response:** `200 OK`
 
-python3 -c "import secrets; print(secrets.token_hex(32))"```json
+### Network connectivity (STB ke domain publik)
 
-```{
+    "ticket_id": "TICKET123",
 
-  "status": "checked_in",
+Jika tidak bisa akses via domain publik meskipun services running:
 
-**Contoh `.env` yang valid:**  "record": {
+    "checked_in_by": "panitia1",```
 
-```env    "event_id": "evt1",
+1. Verifikasi domain DNS pointing ke STB IP
 
-JWT_SECRET=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6    "ticket_id": "TICKET123",
+2. Check firewall rules (port 18081, 18082 harus open)    "checked_in_at": "2026-01-03T13:25:53.415880+00:00"
 
-JWT_ALG=HS256    "checked_in_by": "panitia1",
+3. Verifikasi Cloudflare Tunnel configuration (jika digunakan)
 
-TOKEN_EXPIRE_MINUTES=120    "checked_in_at": "2026-01-03T13:25:53.415880+00:00"
+4. Test DNS resolution:  }### Pre-requisites```json
 
-```  }
 
-}
 
-### Step 3: Build & Deploy Services```
+```bash}
 
-```bash**Error (duplicate):** `400 Bad Request`
+nslookup <identity-domain>
 
-# Build images (jika belum ada)```json
+nslookup <attendance-domain>```### B. Akses via IP Address (Network)
 
-docker-compose build{
+```
+
+
+
+### Memory atau CPU usage tinggi
+
+Curl example:```bash{
+
+Solusi:
+
+```bash
+
+1. Limit resource di docker-compose.prod.yml:
+
+curl -X POST http://localhost:18082/checkins \Jika diakses dari machine lain di network yang sama:
+
+```yaml
+
+services:  -H "Content-Type: application/json" \
+
+  identity-service:
+
+    deploy:  -H "Authorization: Bearer $TOKEN" \# Verify Docker installed  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
+      resources:
+
+        limits:  -d '{"event_id":"evt1","ticket_id":"TICKET123"}'
+
+          memory: 512M
+
+          cpus: '0.5'``````bash
+
+```
+
+
+
+2. Restart containers:
+
+Error (400 - Duplicate check-in):# Replace <STB_IP> dengan IP address STBdocker --version  "token_type": "bearer"
+
+```bash
+
+docker-compose restart```json
+
+```
+
+{curl http://192.168.1.100:18081/health
+
+### Data tidak tersimpan setelah restart
 
   "detail": "Ticket sudah pernah check-in"
 
-# Start services di background}
+Ini adalah expected behavior (in-memory store). Data akan hilang setelah container di-restart.
 
-docker-compose -f docker-compose.prod.yml up -d```
+}curl http://192.168.1.100:18082/healthdocker-compose --version}
 
-
-
-# Atau gunakan deploy script#### 3. Get Attendance by Event
-
-chmod +x deploy.sh```http
-
-./deploy.shGET /attendance/{event_id}
-
-```Authorization: Bearer <TOKEN>
+Untuk production, implementasikan database persistent:
 
 ```
 
-### Step 4: Verifikasi Deployment**Response:** `200 OK`
+- PostgreSQL
+
+- SQLite dengan mounted volume```
+
+- MongoDB
+
+#### 3. Get Attendance by Event
+
+## Repository Structure
+
+```
+
+Setiap folder dalam repository memiliki fungsi spesifik:
+
+**Endpoint:** `GET /attendance/{event_id}`
+
+- `identity-service/app/main.py` — Identity service application
+
+- `attendance-service/app/main.py` — Attendance service application### C. Akses via Domain Publik
+
+- `docker-compose.yml` — Development compose file
+
+- `docker-compose.prod.yml` — Production-ready compose fileAuthentication: Bearer Token Required
+
+- `deploy.sh` — Automated deployment script for STB
+
+- `smoke-test.sh` — Quick verification/testing script# Verify Git installed
+
+- `.env.example` — Environment variables template
+
+- `.env` — Actual secrets (NOT tracked in git)Request header:
+
+
+
+## Repository Links```Backend Team (BT) melakukan routing via Cloudflare Tunnel atau reverse proxy:
+
+
+
+GitHub: https://github.com/ratukhansaaaa/tixgo-microservicesAuthorization: Bearer <access_token>
+
+
+
+Untuk informasi lebih lanjut atau kontribusi, silakan fork repository dan create pull request.```git --version#### 4. Get Current User Info
+
+
+
+
+Response (200 OK):```bash
 
 ```json
 
-**Check container status:**{
+{# Identity Service``````http
 
-```bash  "event_id": "evt1",
+  "event_id": "evt1",
 
-docker ps  "total_checked_in": 1,
+  "total_checked_in": 1,curl https://dina.theokaitou.my.id/health
 
-```  "records": [
+  "records": [
 
-    {
+    {curl https://dina.theokaitou.my.id/auth/loginGET /auth/me
 
-Expected output:      "event_id": "evt1",
+      "event_id": "evt1",
 
-```      "ticket_id": "TICKET123",
+      "ticket_id": "TICKET123",
 
-CONTAINER ID   IMAGE                     STATUS           PORTS      "checked_in_by": "panitia1",
+      "checked_in_by": "panitia1",
 
-xxxxx          tixgo-identity            Up 2 minutes     0.0.0.0:18081->8000/tcp      "checked_in_at": "2026-01-03T13:25:53.415880+00:00"
+      "checked_in_at": "2026-01-03T13:25:53.415880+00:00"# Attendance Service---Authorization: Bearer <TOKEN>
 
-xxxxx          tixgo-attendance          Up 2 minutes     0.0.0.0:18082->8000/tcp    }
+    }
 
-```  ]
+  ]curl https://ratu.theokaitou.my.id/health
 
 }
 
-**Health check endpoints:**```
+```curl https://ratu.theokaitou.my.id/checkins```
+
+
+
+Curl example:```
 
 ```bash
 
-# Identity Service## Authentication & Authorization
+curl -H "Authorization: Bearer $TOKEN" \## Panduan Deployment di STB**Response:** `200 OK`
 
-curl http://localhost:18081/health
+  http://localhost:18082/attendance/evt1
 
-### JWT Token Format
-
-# Attendance ServiceTokens are signed with **HS256** and contain:
-
-curl http://localhost:18082/health```json
-
-```{
-
-  "sub": "username",
-
-Expected response:  "role": "committee|admin",
-
-```json  "iat": 1234567890,
-
-{"status": "ok", "service": "identity-service"}  "exp": 1234671490
-
-{"status": "ok", "service": "attendance"}}
-
-``````
+```Domain mapping:
 
 
 
----### Authorization Requirements
+## Autentikasi dan Otorisasi- Identity Service: `dina.theokaitou.my.id` → `STB_IP:18081````json
 
-| Endpoint | Method | Auth Required | Roles |
 
-## Cara Mengakses Layanan|----------|--------|---------------|-------|
 
-| `/health` (both) | GET | ❌ | - |
+### JWT Token Format- Attendance Service: `ratu.theokaitou.my.id` → `STB_IP:18082`
 
-### A. Akses Lokal (Di STB)| `/auth/register` | POST | ❌ | - |
 
-| `/auth/login` | POST | ❌ | - |
 
-Jika kamu test langsung di machine yang menjalankan Docker:| `/auth/me` | GET | ✅ | any |
+Tokens adalah JWT (JSON Web Token) yang di-sign dengan algoritma HS256.### Step 1: Clone Repository{
 
-| `/checkins` | POST | ✅ | any |
 
-```bash| `/attendance/{event_id}` | GET | ✅ | any |
 
-# Identity Service
+Struktur token:## Dokumentasi API
 
-curl http://localhost:18081/health### Error Responses
+```
 
-curl http://localhost:18081/auth/register- **401 Unauthorized**: Missing or invalid token
+Header.Payload.Signature```bash  "username": "panitia1",
 
-curl http://localhost:18081/auth/login  ```json
+```
 
-  {"detail": "Missing Authorization header"}
+### Identity Service (Port 18081)
 
-# Attendance Service  {"detail": "Token expired"}
+Payload (decoded):
 
-curl http://localhost:18082/health  {"detail": "Invalid token"}
+```jsoncd /home/user  "role": "committee"
 
-curl http://localhost:18082/checkins  ```
+{
 
-```- **400 Bad Request**: Invalid input or duplicate check-in
+  "sub": "panitia1",#### 1. Health Check
 
-  ```json
+  "role": "committee",
 
-### B. Akses via IP Address (Network)  {"detail": "Ticket sudah pernah check-in"}
+  "iat": 1767446742,git clone https://github.com/ratukhansaaaa/tixgo-microservices.git}
 
-  ```
+  "exp": 1767453942
 
-Jika diakses dari machine lain di network yang sama:
+}**Endpoint:** `GET /health`
 
-## Important Notes for Deployment
+```
+
+cd tixgo-microservices```
+
+Token lifetime: 120 menit (default)
+
+Authentication: Tidak diperlukan
+
+### Authorization Requirements
+
+```
+
+| Endpoint | Method | Auth Required | Deskripsi |
+
+|----------|--------|---------------|-----------|Response (200 OK):
+
+| `/health` (both) | GET | Tidak | Health check publik |
+
+| `/auth/register` | POST | Tidak | Registrasi user baru |```json### Attendance Service (Port 18082)
+
+| `/auth/login` | POST | Tidak | Login untuk dapat token |
+
+| `/auth/me` | GET | Ya | Lihat info user sendiri |{
+
+| `/checkins` | POST | Ya | Buat check-in baru |
+
+| `/attendance/{id}` | GET | Ya | Lihat data kehadiran |  "status": "ok",### Step 2: Setup Environment Variables
+
+
+
+### Security Notes  "service": "identity-service"
+
+
+
+1. JWT_SECRET Management}#### 1. Health Check
+
+   - Generate dengan `openssl rand -hex 32`
+
+   - Simpan di `.env` - jangan commit ke git```
+
+   - Gunakan secret yang berbeda untuk development dan production
+
+   - Rotate secret secara berkala**PENTING:** Jangan commit `.env` ke repository. Buat file `.env` lokal dengan secrets yang aman.```http
+
+
+
+2. Password Security#### 2. User Registration
+
+   - Password di-hash menggunakan bcrypt
+
+   - Panjang password: 4-200 karakterGET /health
+
+   - Password > 72 bytes akan ditolak (bcrypt limit)
+
+**Endpoint:** `POST /auth/register`
+
+3. Token Security
+
+   - Token hanya valid 120 menit```bash```
+
+   - Token disimpan di client, bukan di server
+
+   - Gunakan HTTPS untuk transmit tokenAuthentication: Tidak diperlukan
+
+   - Jangan expose token di URL atau logs
+
+# Copy template**Response:** `200 OK`
+
+## Testing
+
+Request body:
+
+### Automated Testing
+
+```jsoncp .env.example .env```json
+
+Smoke test script:
+
+{
 
 ```bash
 
-# Replace <STB_IP> dengan IP address STB## Important Notes for Deployment
+chmod +x smoke-test.sh  "username": "string (min 3, max 50 karakter)",{
 
-# Contoh: 192.168.1.100
+./smoke-test.sh http://localhost:18081 http://localhost:18082
 
-### 1. Environment Configuration
+```  "password": "string (min 4, max 200 karakter)",
 
-curl http://192.168.1.100:18081/health**Do NOT commit your real `.env` into git.** Create a `.env` file on the STB with production secrets:
 
-curl http://192.168.1.100:18082/health
 
-``````env
+Script ini melakukan:  "role": "string (committee|admin)"# Edit dengan editor pilihan  "status": "ok",
 
-JWT_SECRET=<long-random-hex-string-min-32-chars>
+1. Check health endpoints
 
-### C. Akses via Domain Publik (Recommended)JWT_ALG=HS256
+2. Register user baru}
 
-TOKEN_EXPIRE_MINUTES=120
+3. Login dan dapatkan token
 
-**Backend Team (BT)** akan melakukan routing via Cloudflare Tunnel atau reverse proxy:```
+4. Buat check-in baru```nano .env  "service": "attendance"
 
+5. Fetch attendance data
 
+6. Report hasil test
 
-```bashGenerate a secure JWT_SECRET:
 
-# Identity Service```bash
 
-curl https://dina.theokaitou.my.id/health# Using OpenSSL
+Testing via public domain:Response (200 OK):```}
 
-curl https://dina.theokaitou.my.id/auth/loginopenssl rand -hex 32
 
 
+```bash```json
 
-# Attendance Service# Using Python
+./smoke-test.sh https://<identity-domain> https://<attendance-domain>
 
-curl https://ratu.theokaitou.my.id/healthpython3 -c "import secrets; print(secrets.token_hex(32))"
+```{```
 
-curl https://ratu.theokaitou.my.id/checkins```
 
-```
 
-### 2. Port Mapping
+### Manual Testing Flow  "username": "panitia1",
 
-**Domain Mapping:**Services are mapped to host ports for easy routing :
 
-- Identity Service: `dina.theokaitou.my.id` → `STB_IP:18081`- **Identity Service**: Container port 8000 → Host port 18081
 
-- Attendance Service: `ratu.theokaitou.my.id` → `STB_IP:18082`- **Attendance Service**: Container port 8000 → Host port 18082
+Complete workflow test:  "role": "committee"**Isi `.env` (REQUIRED):**
 
 
 
----can then route:
+```bash}
 
-- `dina.theokaitou.my.id` → `STB_IP:18081` (identity)
+# 1. Register user baru
 
-## Dokumentasi API- `ratu.theokaitou.my.id` → `STB_IP:18082` (attendance)
+curl -X POST http://localhost:18081/auth/register \``````env#### 2. Create Check-in
 
-
-
-### Identity Service (Port 18081)### 3. Deployment Steps on STB
-
-
-
-#### 1. Health Check**Prerequisites:**
-
-**Endpoint:** `GET /health`- Docker & Docker Compose installed
-
-- Git repository cloned
-
-**Authentication:** ❌ Tidak diperlukan- `.env` file with production secrets ready
-
-
-
-**Response (200 OK):****Deploy:**
-
-```json```bash
-
-{# Copy production .env to STB
-
-  "status": "ok",scp .env user@stb:/home/user/tixgo-microservices/.env
-
-  "service": "identity-service"
-
-}# SSH into STB and deploy
-
-```ssh user@stb
-
-cd /home/user/tixgo-microservices
-
-**Curl Example:**chmod +x deploy.sh
-
-```bash./deploy.sh
-
-curl http://localhost:18081/health```
-
-```
-
-**Expected Output:**
-
----```bash
-
-$ ./deploy.sh
-
-#### 2. User Registration✓ Building images...
-
-**Endpoint:** `POST /auth/register`✓ Starting containers...
-
-✓ Services are running on ports 18081 and 18082
-
-**Authentication:** ❌ Tidak diperlukan```
-
-
-
-**Request Body:**### 4. Testing the Deployment
-
-```json
-
-{**Local Testing (on STB):**
-
-  "username": "string (min 3, max 50 karakter)",```bash
-
-  "password": "string (min 4, max 200 karakter)",curl http://localhost:18081/health
-
-  "role": "string (committee|admin) - default: committee"curl http://localhost:18082/health
-
-}```
-
-```
-
-**Remote Testing (via public domain):**
-
-**Response (200 OK):**```bash
-
-```jsoncurl https://dina.theokaitou.my.id/health
-
-{curl https://ratu.theokaitou.my.id/health
-
-  "username": "panitia1",```
-
-  "role": "committee"
-
-}**Full Workflow Example:**
-
-``````bash
-
-# Login
-
-**Curl Example:**TOKEN=$(curl -s -X POST https://dina.theokaitou.my.id/auth/login \
-
-```bash  -H "Content-Type: application/json" \
-
-curl -X POST http://localhost:18081/auth/register \  -d '{"username":"panitia1","password":"secret"}' \
-
-  -H "Content-Type: application/json" \  | jq -r .access_token)
+  -H "Content-Type: application/json" \
 
   -d '{
 
-    "username": "panitia1",# Create check-in
+    "username": "testuser",
 
-    "password": "rahasia123",curl -X POST https://ratu.theokaitou.my.id/checkins \
+    "password": "testpass123",Error (400 - User sudah ada):JWT_SECRET=<random-string-32-karakter-atau-lebih>```http
 
-    "role": "committee"  -H "Content-Type: application/json" \
+    "role": "committee"
 
-  }'  -H "Authorization: Bearer $TOKEN" \
-
-```  -d '{"event_id":"evt1","ticket_id":"TICKET123"}'
+  }'```json
 
 
 
-**Error Response (400):**# Fetch attendance
+# 2. Login dan simpan token{JWT_ALG=HS256POST /checkins
 
-```jsoncurl -H "Authorization: Bearer $TOKEN" \
+TOKEN=$(curl -s -X POST http://localhost:18081/auth/login \
 
-{  https://ratu.theokaitou.my.id/attendance/evt1
+  -H "Content-Type: application/json" \  "detail": "User panitia1 sudah terdaftar"
 
-  "detail": "User panitia1 sudah terdaftar"```
+  -d '{
+
+    "username": "testuser",}TOKEN_EXPIRE_MINUTES=120Content-Type: application/json
+
+    "password": "testpass123"
+
+  }' | jq -r .access_token)```
+
+
+
+# 3. Verify token dengan /me endpoint```Authorization: Bearer <TOKEN>
+
+curl -H "Authorization: Bearer $TOKEN" \
+
+  http://localhost:18081/auth/me#### 3. User Login
+
+
+
+# 4. Create check-in
+
+curl -X POST http://localhost:18082/checkins \
+
+  -H "Content-Type: application/json" \**Endpoint:** `POST /auth/login`
+
+  -H "Authorization: Bearer $TOKEN" \
+
+  -d '{"event_id":"konsert_2026","ticket_id":"TKT-001"}'**Generate JWT_SECRET yang aman:**{
+
+
+
+# 5. Get attendance for eventAuthentication: Tidak diperlukan
+
+curl -H "Authorization: Bearer $TOKEN" \
+
+  http://localhost:18082/attendance/konsert_2026```bash  "event_id": "evt1",
+
+```
+
+Request body:
+
+## Troubleshooting
+
+```json# Menggunakan OpenSSL  "ticket_id": "TICKET123"
+
+### Containers tidak running
+
+{
+
+Diagnosis:
+
+```bash  "username": "panitia1",openssl rand -hex 32}
+
+docker-compose logs identity-service
+
+docker-compose logs attendance-service  "password": "secret"
+
+docker ps
+
+```}```
+
+
+
+Solution:```
+
+```bash
+
+docker-compose build# ATAU menggunakan Python**Response:** `201 Created`
+
+docker-compose up
+
+```Response (200 OK):
+
+
+
+### Port sudah digunakan```jsonpython3 -c "import secrets; print(secrets.token_hex(32))"```json
+
+
+
+Check process:{
+
+```bash
+
+lsof -i :18081  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",```{
+
+lsof -i :18082
+
+```  "token_type": "bearer"
+
+
+
+Kill process:}  "status": "checked_in",
+
+```bash
+
+lsof -ti:18081 | xargs kill -9```
+
+lsof -ti:18082 | xargs kill -9
+
+```**Contoh `.env` yang valid:**  "record": {
+
+
+
+### JWT_SECRET error atau token tidak validCurl example:
+
+
+
+Check .env file:```bash```env    "event_id": "evt1",
+
+```bash
+
+cat .envTOKEN=$(curl -s -X POST http://localhost:18081/auth/login \
+
+```
+
+  -H "Content-Type: application/json" \JWT_SECRET=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6    "ticket_id": "TICKET123",
+
+Pastikan:
+
+1. JWT_SECRET tidak kosong  -d '{"username":"panitia1","password":"secret"}' | jq -r .access_token)
+
+2. JWT_SECRET sama di semua services
+
+3. Min 32 karakter untuk security```JWT_ALG=HS256    "checked_in_by": "panitia1",
+
+
+
+Restart services:
+
+```bash
+
+docker-compose restart#### 4. Get Current User InfoTOKEN_EXPIRE_MINUTES=120    "checked_in_at": "2026-01-03T13:25:53.415880+00:00"
+
+```
+
+
+
+### Token expired error
+
+**Endpoint:** `GET /auth/me````  }
+
+Token sudah kadaluarsa (> 120 menit). Login ulang:
+
+
+
+```bash
+
+TOKEN=$(curl -s -X POST http://localhost:18081/auth/login \Authentication: Bearer Token Required}
+
+  -H "Content-Type: application/json" \
+
+  -d '{"username":"panitia1","password":"secret"}' | jq -r .access_token)
+
+```
+
+Request header:### Step 3: Build & Deploy Services```
+
+### Ticket sudah pernah check-in
+
+```
+
+Ticket ID harus unik per event. Gunakan ticket_id yang berbeda:
+
+Authorization: Bearer <access_token>```bash**Error (duplicate):** `400 Bad Request`
+
+```bash
+
+curl -X POST http://localhost:18082/checkins \```
+
+  -H "Content-Type: application/json" \
+
+  -H "Authorization: Bearer $TOKEN" \# Build images (jika belum ada)```json
+
+  -d '{"event_id":"evt1","ticket_id":"TKT-UNIQUE-002"}'
+
+```Response (200 OK):
+
+
+
+### 401 Unauthorized error```jsondocker-compose build{
+
+
+
+Authorization header format harus: `"Bearer <token>"`{
+
+
+
+Benar:  "username": "panitia1",  "detail": "Ticket sudah pernah check-in"
+
+```bash
+
+curl -H "Authorization: Bearer $TOKEN" http://localhost:18082/checkins  "role": "committee"
+
+```
+
+}# Start services di background}
+
+### View Logs
+
+```
+
+```bash
+
+docker-compose logs identity-service -fdocker-compose -f docker-compose.prod.yml up -d```
+
+docker-compose logs attendance-service -f
+
+docker-compose logs -fCurl example:
+
+docker-compose logs --tail=50
+
+``````bash
+
+
+
+## Struktur Projectcurl -H "Authorization: Bearer $TOKEN" \
+
+
+
+```  http://localhost:18081/auth/me# Atau gunakan deploy script#### 3. Get Attendance by Event
+
+tixgo-microservices/
+
+├── identity-service/```
+
+│   ├── app/
+
+│   │   └── main.py              # Identity service implementationchmod +x deploy.sh```http
+
+│   ├── Dockerfile
+
+│   └── requirements.txt### Attendance Service (Port 18082)
+
+├── attendance-service/
+
+│   ├── app/./deploy.shGET /attendance/{event_id}
+
+│   │   └── main.py              # Attendance service implementation
+
+│   ├── Dockerfile#### 1. Health Check
+
+│   └── requirements.txt
+
+├── cloudflared/```Authorization: Bearer <TOKEN>
+
+│   └── config.yml.example
+
+├── docker-compose.yml**Endpoint:** `GET /health`
+
+├── docker-compose.prod.yml
+
+├── deploy.sh```
+
+├── smoke-test.sh
+
+├── .env.exampleAuthentication: Tidak diperlukan
+
+├── .gitignore
+
+├── README.md### Step 4: Verifikasi Deployment**Response:** `200 OK`
+
+└── README.pdf
+
+```Response (200 OK):
+
+
+
+## Notes```json```json
+
+
+
+### Data Persistence{
+
+
+
+Saat ini data disimpan in-memory. Data akan hilang saat container restart.  "status": "ok",**Check container status:**{
+
+
+
+Untuk production: gunakan database seperti PostgreSQL atau SQLite.  "service": "attendance"
+
+
+
+### Future Improvements}```bash  "event_id": "evt1",
+
+
+
+1. Event Management Service```
+
+2. Database Persistence (PostgreSQL/SQLite)
+
+3. Rate limiting & throttlingdocker ps  "total_checked_in": 1,
+
+4. API logging & monitoring
+
+5. CI/CD pipeline (GitHub Actions)#### 2. Create Check-in
+
+
+
+## References```  "records": [
+
+
+
+- FastAPI Documentation: https://fastapi.tiangolo.com**Endpoint:** `POST /checkins`
+
+- Docker Documentation: https://docs.docker.com
+
+- JWT Specification: https://tools.ietf.org/html/rfc7519    {
+
+
+
+---Authentication: Bearer Token Required
+
+
+
+**Version:** 1.0.0Expected output:      "event_id": "evt1",
+
+**Status:** Production Ready for Tugas 2
+
+Request header:
+
+``````      "ticket_id": "TICKET123",
+
+Authorization: Bearer <access_token>
+
+Content-Type: application/jsonCONTAINER ID   IMAGE                     STATUS           PORTS      "checked_in_by": "panitia1",
+
+```
+
+xxxxx          tixgo-identity            Up 2 minutes     0.0.0.0:18081->8000/tcp      "checked_in_at": "2026-01-03T13:25:53.415880+00:00"
+
+Request body:
+
+```jsonxxxxx          tixgo-attendance          Up 2 minutes     0.0.0.0:18082->8000/tcp    }
+
+{
+
+  "event_id": "evt1",```  ]
+
+  "ticket_id": "TICKET123"
+
+}}
+
+```
+
+**Health check endpoints:**```
+
+Response (201 Created):
+
+```json```bash
+
+{
+
+  "status": "checked_in",# Identity Service## Authentication & Authorization
+
+  "record": {
+
+    "event_id": "evt1",curl http://localhost:18081/health
+
+    "ticket_id": "TICKET123",
+
+    "checked_in_by": "panitia1",### JWT Token Format
+
+    "checked_in_at": "2026-01-03T13:25:53.415880+00:00"
+
+  }# Attendance ServiceTokens are signed with **HS256** and contain:
 
 }
 
-```### 5. Automated Testing
+```curl http://localhost:18082/health```json
 
-Run the smoke test to verify all services:
+
+
+Curl example:```{
+
+```bash
+
+curl -X POST http://localhost:18082/checkins \  "sub": "username",
+
+  -H "Content-Type: application/json" \
+
+  -H "Authorization: Bearer $TOKEN" \Expected response:  "role": "committee|admin",
+
+  -d '{"event_id":"evt1","ticket_id":"TICKET123"}'
+
+``````json  "iat": 1234567890,
+
+
+
+Error (400 - Duplicate check-in):{"status": "ok", "service": "identity-service"}  "exp": 1234671490
+
+```json
+
+{{"status": "ok", "service": "attendance"}}
+
+  "detail": "Ticket sudah pernah check-in"
+
+}``````
+
+```
+
+
+
+#### 3. Get Attendance by Event
+
+---### Authorization Requirements
+
+**Endpoint:** `GET /attendance/{event_id}`
+
+| Endpoint | Method | Auth Required | Roles |
+
+Authentication: Bearer Token Required
+
+## Cara Mengakses Layanan|----------|--------|---------------|-------|
+
+Request header:
+
+```| `/health` (both) | GET | ❌ | - |
+
+Authorization: Bearer <access_token>
+
+```### A. Akses Lokal (Di STB)| `/auth/register` | POST | ❌ | - |
+
+
+
+Response (200 OK):| `/auth/login` | POST | ❌ | - |
+
+```json
+
+{Jika kamu test langsung di machine yang menjalankan Docker:| `/auth/me` | GET | ✅ | any |
+
+  "event_id": "evt1",
+
+  "total_checked_in": 1,| `/checkins` | POST | ✅ | any |
+
+  "records": [
+
+    {```bash| `/attendance/{event_id}` | GET | ✅ | any |
+
+      "event_id": "evt1",
+
+      "ticket_id": "TICKET123",# Identity Service
+
+      "checked_in_by": "panitia1",
+
+      "checked_in_at": "2026-01-03T13:25:53.415880+00:00"curl http://localhost:18081/health### Error Responses
+
+    }
+
+  ]curl http://localhost:18081/auth/register- **401 Unauthorized**: Missing or invalid token
+
+}
+
+```curl http://localhost:18081/auth/login  ```json
+
+
+
+Curl example:  {"detail": "Missing Authorization header"}
+
+```bash
+
+curl -H "Authorization: Bearer $TOKEN" \# Attendance Service  {"detail": "Token expired"}
+
+  http://localhost:18082/attendance/evt1
+
+```curl http://localhost:18082/health  {"detail": "Invalid token"}
+
+
+
+## Autentikasi dan Otorisasicurl http://localhost:18082/checkins  ```
+
+
+
+### JWT Token Format```- **400 Bad Request**: Invalid input or duplicate check-in
+
+
+
+Tokens adalah JWT (JSON Web Token) yang di-sign dengan algoritma HS256.  ```json
+
+
+
+Struktur token:### B. Akses via IP Address (Network)  {"detail": "Ticket sudah pernah check-in"}
+
+```
+
+Header.Payload.Signature  ```
+
+```
+
+Jika diakses dari machine lain di network yang sama:
+
+Payload (decoded):
+
+```json## Important Notes for Deployment
+
+{
+
+  "sub": "panitia1",```bash
+
+  "role": "committee",
+
+  "iat": 1767446742,# Replace <STB_IP> dengan IP address STB## Important Notes for Deployment
+
+  "exp": 1767453942
+
+}# Contoh: 192.168.1.100
+
+```
+
+### 1. Environment Configuration
+
+Token lifetime: 120 menit (default)
+
+curl http://192.168.1.100:18081/health**Do NOT commit your real `.env` into git.** Create a `.env` file on the STB with production secrets:
+
+### Authorization Requirements
+
+curl http://192.168.1.100:18082/health
+
+| Endpoint | Method | Auth Required | Deskripsi |
+
+|----------|--------|---------------|-----------|``````env
+
+| `/health` (both) | GET | Tidak | Health check publik |
+
+| `/auth/register` | POST | Tidak | Registrasi user baru |JWT_SECRET=<long-random-hex-string-min-32-chars>
+
+| `/auth/login` | POST | Tidak | Login untuk dapat token |
+
+| `/auth/me` | GET | Ya | Lihat info user sendiri |### C. Akses via Domain Publik (Recommended)JWT_ALG=HS256
+
+| `/checkins` | POST | Ya | Buat check-in baru |
+
+| `/attendance/{id}` | GET | Ya | Lihat data kehadiran |TOKEN_EXPIRE_MINUTES=120
+
+
+
+### Security Notes**Backend Team (BT)** akan melakukan routing via Cloudflare Tunnel atau reverse proxy:```
+
+
+
+1. JWT_SECRET Management
+
+   - Generate dengan `openssl rand -hex 32`
+
+   - Simpan di `.env` - jangan commit ke git```bashGenerate a secure JWT_SECRET:
+
+   - Gunakan secret yang berbeda untuk development dan production
+
+   - Rotate secret secara berkala# Identity Service```bash
+
+
+
+2. Password Securitycurl https://dina.theokaitou.my.id/health# Using OpenSSL
+
+   - Password di-hash menggunakan bcrypt
+
+   - Panjang password: 4-200 karaktercurl https://dina.theokaitou.my.id/auth/loginopenssl rand -hex 32
+
+   - Password > 72 bytes akan ditolak (bcrypt limit)
+
+
+
+3. Token Security
+
+   - Token hanya valid 120 menit# Attendance Service# Using Python
+
+   - Token disimpan di client, bukan di server
+
+   - Gunakan HTTPS untuk transmit tokencurl https://ratu.theokaitou.my.id/healthpython3 -c "import secrets; print(secrets.token_hex(32))"
+
+   - Jangan expose token di URL atau logs
+
+curl https://ratu.theokaitou.my.id/checkins```
+
+## Testing
+
+```
+
+### Automated Testing
+
+### 2. Port Mapping
+
+Smoke test script:
+
+**Domain Mapping:**Services are mapped to host ports for easy routing :
+
+```bash
+
+chmod +x smoke-test.sh- Identity Service: `dina.theokaitou.my.id` → `STB_IP:18081`- **Identity Service**: Container port 8000 → Host port 18081
+
+./smoke-test.sh http://localhost:18081 http://localhost:18082
+
+```- Attendance Service: `ratu.theokaitou.my.id` → `STB_IP:18082`- **Attendance Service**: Container port 8000 → Host port 18082
+
+
+
+Script ini melakukan:
+
+1. Check health endpoints
+
+2. Register user baru---can then route:
+
+3. Login dan dapatkan token
+
+4. Buat check-in baru- `dina.theokaitou.my.id` → `STB_IP:18081` (identity)
+
+5. Fetch attendance data
+
+6. Report hasil test## Dokumentasi API- `ratu.theokaitou.my.id` → `STB_IP:18082` (attendance)
+
+
+
+Testing via public domain:
+
+
+
+```bash### Identity Service (Port 18081)### 3. Deployment Steps on STB
+
+./smoke-test.sh https://dina.theokaitou.my.id https://ratu.theokaitou.my.id
+
+```
+
+
+
+### Manual Testing Flow#### 1. Health Check**Prerequisites:**
+
+
+
+Complete workflow test:**Endpoint:** `GET /health`- Docker & Docker Compose installed
+
+
+
+```bash- Git repository cloned
+
+# 1. Register user baru
+
+curl -X POST http://localhost:18081/auth/register \**Authentication:** ❌ Tidak diperlukan- `.env` file with production secrets ready
+
+  -H "Content-Type: application/json" \
+
+  -d '{
+
+    "username": "testuser",
+
+    "password": "testpass123",**Response (200 OK):****Deploy:**
+
+    "role": "committee"
+
+  }'```json```bash
+
+
+
+# 2. Login dan simpan token{# Copy production .env to STB
+
+TOKEN=$(curl -s -X POST http://localhost:18081/auth/login \
+
+  -H "Content-Type: application/json" \  "status": "ok",scp .env user@stb:/home/user/tixgo-microservices/.env
+
+  -d '{
+
+    "username": "testuser",  "service": "identity-service"
+
+    "password": "testpass123"
+
+  }' | jq -r .access_token)}# SSH into STB and deploy
+
+
+
+# 3. Verify token dengan /me endpoint```ssh user@stb
+
+curl -H "Authorization: Bearer $TOKEN" \
+
+  http://localhost:18081/auth/mecd /home/user/tixgo-microservices
+
+
+
+# 4. Create check-in**Curl Example:**chmod +x deploy.sh
+
+curl -X POST http://localhost:18082/checkins \
+
+  -H "Content-Type: application/json" \```bash./deploy.sh
+
+  -H "Authorization: Bearer $TOKEN" \
+
+  -d '{"event_id":"konsert_2026","ticket_id":"TKT-001"}'curl http://localhost:18081/health```
+
+
+
+# 5. Get attendance for event```
+
+curl -H "Authorization: Bearer $TOKEN" \
+
+  http://localhost:18082/attendance/konsert_2026**Expected Output:**
+
+```
 
 ---```bash
 
-# Local
+## Troubleshooting
 
-#### 3. User Login./smoke-test.sh http://localhost:18081 http://localhost:18082
+$ ./deploy.sh
 
-**Endpoint:** `POST /auth/login`
+### Containers tidak running
 
-# Remote
+#### 2. User Registration✓ Building images...
 
-**Authentication:** ❌ Tidak diperlukan./smoke-test.sh https://dina.theokaitou.my.id https://ratu.theokaitou.my.id
+Diagnosis:
+
+```bash**Endpoint:** `POST /auth/register`✓ Starting containers...
+
+docker-compose logs identity-service
+
+docker-compose logs attendance-service✓ Services are running on ports 18081 and 18082
+
+docker ps
+
+```**Authentication:** ❌ Tidak diperlukan```
+
+
+
+Solution:
+
+```bash
+
+docker-compose build**Request Body:**### 4. Testing the Deployment
+
+docker-compose up
+
+``````json
+
+
+
+### Port sudah digunakan{**Local Testing (on STB):**
+
+
+
+Check process:  "username": "string (min 3, max 50 karakter)",```bash
+
+```bash
+
+lsof -i :18081  "password": "string (min 4, max 200 karakter)",curl http://localhost:18081/health
+
+lsof -i :18082
+
+```  "role": "string (committee|admin) - default: committee"curl http://localhost:18082/health
+
+
+
+Kill process:}```
+
+```bash
+
+lsof -ti:18081 | xargs kill -9```
+
+lsof -ti:18082 | xargs kill -9
+
+```**Remote Testing (via public domain):**
+
+
+
+### JWT_SECRET error atau token tidak valid**Response (200 OK):**```bash
+
+
+
+Check .env file:```jsoncurl https://dina.theokaitou.my.id/health
+
+```bash
+
+cat .env{curl https://ratu.theokaitou.my.id/health
 
 ```
 
-**Request Body:**
+  "username": "panitia1",```
 
-```jsonThe smoke test will:
+Pastikan:
 
-{Check health endpoints
+1. JWT_SECRET tidak kosong  "role": "committee"
 
-  "username": "string",Register & login a user
+2. JWT_SECRET sama di semua services
 
-  "password": "string"Create a check-in
+3. Min 32 karakter untuk security}**Full Workflow Example:**
 
-}Fetch attendance data
+
+
+Restart services:``````bash
+
+```bash
+
+docker-compose restart# Login
 
 ```
 
-## Project Structure
+**Curl Example:**TOKEN=$(curl -s -X POST https://dina.theokaitou.my.id/auth/login \
 
-**Response (200 OK):**
+### Token expired error
 
-```json```
+```bash  -H "Content-Type: application/json" \
 
-{tixgo-microservices/
+Token sudah kadaluarsa (> 120 menit). Login ulang:
 
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwYW5pdGlhMSIsInJvbGUiOiJjb21taXR0ZWUiLCJpYXQiOjE3Njc0NDY3NDIsImV4cCI6MTc2NzQ1Mzk0Mn0.MU1pIorjZmKyhe7hweDGHkLvFzPtsxCCFo6FMnYiXxE",├── identity-service/
+curl -X POST http://localhost:18081/auth/register \  -d '{"username":"panitia1","password":"secret"}' \
 
-  "token_type": "bearer"│   ├── Dockerfile
+```bash
 
-}│   ├── requirements.txt
+TOKEN=$(curl -s -X POST http://localhost:18081/auth/login \  -H "Content-Type: application/json" \  | jq -r .access_token)
 
-```│   └── app/
+  -H "Content-Type: application/json" \
 
-│       └── main.py           # FastAPI app with auth endpoints
+  -d '{"username":"panitia1","password":"secret"}' | jq -r .access_token)  -d '{
 
-**Curl Example:**├── attendance-service/
+```
 
-```bash│   ├── Dockerfile
+    "username": "panitia1",# Create check-in
 
-# Login│   ├── requirements.txt
+### Ticket sudah pernah check-in
 
-TOKEN=$(curl -s -X POST http://localhost:18081/auth/login \│   └── app/
+    "password": "rahasia123",curl -X POST https://ratu.theokaitou.my.id/checkins \
 
-  -H "Content-Type: application/json" \│       └── main.py           # FastAPI app with checkin endpoints
+Ticket ID harus unik per event. Gunakan ticket_id yang berbeda:
+
+    "role": "committee"  -H "Content-Type: application/json" \
+
+```bash
+
+curl -X POST http://localhost:18082/checkins \  }'  -H "Authorization: Bearer $TOKEN" \
+
+  -H "Content-Type: application/json" \
+
+  -H "Authorization: Bearer $TOKEN" \```  -d '{"event_id":"evt1","ticket_id":"TICKET123"}'
+
+  -d '{"event_id":"evt1","ticket_id":"TKT-UNIQUE-002"}'
+
+```
+
+
+
+### 401 Unauthorized error**Error Response (400):**# Fetch attendance
+
+
+
+Authorization header format harus: `"Bearer <token>"````jsoncurl -H "Authorization: Bearer $TOKEN" \
+
+
+
+Benar:{  https://ratu.theokaitou.my.id/attendance/evt1
+
+```bash
+
+curl -H "Authorization: Bearer $TOKEN" http://localhost:18082/checkins  "detail": "User panitia1 sudah terdaftar"```
+
+```
+
+}
+
+### View Logs
+
+```### 5. Automated Testing
+
+```bash
+
+docker-compose logs identity-service -fRun the smoke test to verify all services:
+
+docker-compose logs attendance-service -f
+
+docker-compose logs -f---```bash
+
+docker-compose logs --tail=50
+
+```# Local
+
+
+
+## Struktur Project#### 3. User Login./smoke-test.sh http://localhost:18081 http://localhost:18082
+
+
+
+```**Endpoint:** `POST /auth/login`
+
+tixgo-microservices/
+
+├── identity-service/# Remote
+
+│   ├── app/
+
+│   │   └── main.py              # Identity service implementation**Authentication:** ❌ Tidak diperlukan./smoke-test.sh https://dina.theokaitou.my.id https://ratu.theokaitou.my.id
+
+│   ├── Dockerfile
+
+│   └── requirements.txt```
+
+├── attendance-service/
+
+│   ├── app/**Request Body:**
+
+│   │   └── main.py              # Attendance service implementation
+
+│   ├── Dockerfile```jsonThe smoke test will:
+
+│   └── requirements.txt
+
+├── cloudflared/{Check health endpoints
+
+│   └── config.yml.example
+
+├── docker-compose.yml  "username": "string",Register & login a user
+
+├── docker-compose.prod.yml
+
+├── deploy.sh  "password": "string"Create a check-in
+
+├── smoke-test.sh
+
+├── .env.example}Fetch attendance data
+
+├── .gitignore
+
+├── README.md```
+
+└── README.pdf
+
+```## Project Structure
+
+
+
+## Notes**Response (200 OK):**
+
+
+
+### Data Persistence```json```
+
+
+
+Saat ini data disimpan in-memory. Data akan hilang saat container restart.{tixgo-microservices/
+
+
+
+Untuk production: gunakan database seperti PostgreSQL atau SQLite.  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwYW5pdGlhMSIsInJvbGUiOiJjb21taXR0ZWUiLCJpYXQiOjE3Njc0NDY3NDIsImV4cCI6MTc2NzQ1Mzk0Mn0.MU1pIorjZmKyhe7hweDGHkLvFzPtsxCCFo6FMnYiXxE",├── identity-service/
+
+
+
+### Future Improvements  "token_type": "bearer"│   ├── Dockerfile
+
+
+
+1. Event Management Service}│   ├── requirements.txt
+
+2. Database Persistence (PostgreSQL/SQLite)
+
+3. Rate limiting & throttling```│   └── app/
+
+4. API logging & monitoring
+
+5. CI/CD pipeline (GitHub Actions)│       └── main.py           # FastAPI app with auth endpoints
+
+
+
+## References**Curl Example:**├── attendance-service/
+
+
+
+- FastAPI Documentation: https://fastapi.tiangolo.com```bash│   ├── Dockerfile
+
+- Docker Documentation: https://docs.docker.com
+
+- JWT Specification: https://tools.ietf.org/html/rfc7519# Login│   ├── requirements.txt
+
+
+
+---TOKEN=$(curl -s -X POST http://localhost:18081/auth/login \│   └── app/
+
+
+
+**Version:** 1.0.0  -H "Content-Type: application/json" \│       └── main.py           # FastAPI app with checkin endpoints
+
+**Status:** Production Ready for Tugas 2
 
   -d '{├── cloudflared/
 
