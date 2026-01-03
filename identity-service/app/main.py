@@ -4,11 +4,14 @@ from typing import Dict, Optional
 
 import jwt
 from fastapi import FastAPI, HTTPException, Header
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 from passlib.hash import bcrypt
 
-app = FastAPI(title="TixGo Identity Service", version="1.0.0")
+app = FastAPI(
+    title="TixGo Identity Service",
+    version="1.0.0"
+)
 
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret")
 JWT_ALG = os.getenv("JWT_ALG", "HS256")
@@ -17,6 +20,7 @@ TOKEN_EXPIRE_MINUTES = int(os.getenv("TOKEN_EXPIRE_MINUTES", "120"))
 
 # ----------------------------
 # Helpers
+# ----------------------------
 # ----------------------------
 def _password_bytes_len(pw: str) -> int:
     return len(pw.encode("utf-8"))
@@ -104,7 +108,7 @@ def health():
 
 @app.get("/", response_class=HTMLResponse)
 def root():
-        # Modern landing page with animated ticket background
+        # Modern landing page with solid gradient background
         return """
         <!DOCTYPE html>
         <html lang="en">
@@ -117,44 +121,13 @@ def root():
                     
                     body {
                         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                        background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+                        background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 100%);
                         min-height: 100vh;
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         padding: 20px;
-                        overflow: hidden;
                         position: relative;
-                    }
-                    
-                    .background-animation {
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        overflow: hidden;
-                        pointer-events: none;
-                        z-index: 1;
-                    }
-                    
-                    .ticket {
-                        position: absolute;
-                        font-size: 60px;
-                        opacity: 0.1;
-                        animation: float 15s infinite ease-in-out;
-                    }
-                    
-                    .ticket:nth-child(1) { left: 5%; top: 10%; animation-delay: 0s; }
-                    .ticket:nth-child(2) { left: 15%; top: 70%; animation-delay: 2s; }
-                    .ticket:nth-child(3) { left: 80%; top: 20%; animation-delay: 4s; }
-                    .ticket:nth-child(4) { left: 85%; top: 60%; animation-delay: 6s; }
-                    .ticket:nth-child(5) { left: 40%; top: 5%; animation-delay: 8s; }
-                    .ticket:nth-child(6) { left: 60%; top: 80%; animation-delay: 10s; }
-                    
-                    @keyframes float {
-                        0%, 100% { transform: translateY(0px) rotate(0deg); }
-                        50% { transform: translateY(-30px) rotate(5deg); }
                     }
                     
                     .container {
@@ -166,8 +139,6 @@ def root():
                         padding: 40px;
                         max-width: 500px;
                         width: 100%;
-                        position: relative;
-                        z-index: 2;
                     }
                     
                     h1 {
@@ -243,15 +214,6 @@ def root():
                 </style>
             </head>
             <body>
-                <div class="background-animation">
-                    <div class="ticket">🎫</div>
-                    <div class="ticket">🎫</div>
-                    <div class="ticket">🎫</div>
-                    <div class="ticket">🎫</div>
-                    <div class="ticket">🎫</div>
-                    <div class="ticket">🎫</div>
-                </div>
-                
                 <div class="container">
                     <h1>TixGo Identity Service</h1>
                     <p class="subtitle">Authentication & User Management</p>
@@ -270,41 +232,6 @@ def root():
         </html>
         """
 
-
-@app.get("/redoc")
-def redoc_redirect():
-        """Serve a resilient ReDoc page that loads ReDoc from the CDN but
-        falls back to a visible link to /docs if the ReDoc script fails to load.
-        This avoids showing a blank white page when the CDN is blocked.
-        """
-        return HTMLResponse(content="""
-        <!doctype html>
-        <html>
-            <head>
-                <meta charset="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <title>TixGo Identity Service - ReDoc</title>
-                <style>body{margin:0;padding:0;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}</style>
-            </head>
-            <body>
-                <noscript>
-                    <strong>ReDoc requires JavaScript to function. Please enable it to browse the documentation.</strong>
-                </noscript>
-                <redoc spec-url="/openapi.json"></redoc>
-                <script>
-                    (function(){
-                        var script = document.createElement('script');
-                        script.src = 'https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js';
-                        script.onload = function(){ /* loaded */ };
-                        script.onerror = function(){
-                            document.body.innerHTML = '<div style="padding:24px;font-family:inherit"><h1>Documentation (ReDoc)</h1><p>Failed to load ReDoc from CDN. You can use the interactive Swagger UI instead:</p><p><a href="/docs">Open Swagger UI</a></p><pre style="background:#f5f5f5;padding:12px;border-radius:6px">OpenAPI spec available at /openapi.json</pre></div>';
-                        };
-                        document.body.appendChild(script);
-                    })();
-                </script>
-            </body>
-        </html>
-        """, media_type="text/html")
 
 
 @app.post("/auth/register", response_model=MeResponse)
