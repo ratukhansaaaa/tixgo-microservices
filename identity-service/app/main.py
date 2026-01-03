@@ -219,7 +219,7 @@ def root():
                     <p class="subtitle">Authentication & User Management</p>
                     <div class="links">
                         <a href="/docs" class="btn-primary">Swagger UI (Interactive)</a>
-                        <a href="/redoc" class="btn-secondary">ReDoc (Beautiful Docs)</a>
+                        <a href="/redoc" class="btn-secondary">ReDoc</a>
                         <a href="/health" class="btn-secondary">Health Status</a>
                     </div>
                     <div class="info">
