@@ -1,0 +1,35 @@
+Checking health endpoints...
+{
+  "status": "ok",
+  "service": "identity-service"
+}
+{
+  "status": "ok",
+  "service": "attendance"
+}
+\nLogging in as demo user (panitia1 / secret)
+Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwYW5pdGlhMSI...
+\nCreating checkin evt-smoke / TICKET-SMOKE
+{
+  "status": "checked_in",
+  "record": {
+    "event_id": "evt-smoke",
+    "ticket_id": "TICKET-SMOKE",
+    "checked_in_by": "panitia1",
+    "checked_in_at": "2026-01-03T15:56:44.028344Z"
+  }
+}
+\nFetching attendance for evt-smoke
+{
+  "event_id": "evt-smoke",
+  "total_checked_in": 1,
+  "records": [
+    {
+      "event_id": "evt-smoke",
+      "ticket_id": "TICKET-SMOKE",
+      "checked_in_by": "panitia1",
+      "checked_in_at": "2026-01-03T15:56:44.028344Z"
+    }
+  ]
+}
+\nSmoke test finished. If the above responses look correct, services are working.
