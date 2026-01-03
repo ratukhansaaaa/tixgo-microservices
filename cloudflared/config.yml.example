@@ -1,0 +1,19 @@
+# Example cloudflared config. BT will typically run the tunnel and create DNS routes
+# If you run cloudflared on the STB instead, create a tunnel and credentials, then
+# place the tunnel credentials JSON on the STB and update credentials-file path.
+
+# Replace <TUNNEL_ID> with the UUID returned by `cloudflared tunnel create <name>`
+# and update the credentials-file path to where the JSON is stored on the STB.
+
+# Example:
+# tunnel: <TUNNEL_ID>
+# credentials-file: /etc/cloudflared/<TUNNEL_ID>.json
+#
+# ingress:
+#  - hostname: dina.theokaitou.my.id
+#    service: http://identity:8000
+#  - hostname: ratu.theokaitou.my.id
+#    service: http://attendance:8000
+#  - service: http_status:404
+
+# Note: If BT handles the routing/tunnel, you do not need to run cloudflared.
