@@ -104,17 +104,101 @@ def health():
 
 @app.get("/", response_class=HTMLResponse)
 def root():
-        # Simple HTML landing page with links to docs and health
+        # Modern HTML landing page with styling
         return """
-        <html>
-            <head><title>TixGo Identity Service</title></head>
+        <!DOCTYPE html>
+        <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>TixGo Identity Service</title>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        min-height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 20px;
+                    }
+                    .container {
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                        padding: 40px;
+                        max-width: 500px;
+                        width: 100%;
+                    }
+                    h1 {
+                        color: #333;
+                        margin-bottom: 10px;
+                        font-size: 32px;
+                    }
+                    .subtitle {
+                        color: #666;
+                        margin-bottom: 30px;
+                        font-size: 14px;
+                    }
+                    .links {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 12px;
+                    }
+                    a {
+                        display: block;
+                        padding: 12px 16px;
+                        border-radius: 8px;
+                        text-decoration: none;
+                        font-weight: 500;
+                        transition: all 0.3s ease;
+                        text-align: center;
+                    }
+                    .btn-primary {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                    }
+                    .btn-primary:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+                    }
+                    .btn-secondary {
+                        background: #f0f0f0;
+                        color: #333;
+                        border: 2px solid #e0e0e0;
+                    }
+                    .btn-secondary:hover {
+                        background: #e8e8e8;
+                        border-color: #667eea;
+                        color: #667eea;
+                    }
+                    .info {
+                        background: #f9f9f9;
+                        border-left: 4px solid #667eea;
+                        padding: 12px;
+                        border-radius: 4px;
+                        margin-top: 20px;
+                        font-size: 13px;
+                        color: #555;
+                    }
+                </style>
+            </head>
             <body>
-                <h1>TixGo Identity Service</h1>
-                                <ul>
-                                    <li><a href="/docs">Interactive API docs (Swagger)</a></li>
-                                    <li><a href="/redoc">ReDoc</a></li>
-                                    <li><a href="/health">Health</a></li>
-                                </ul>
+                <div class="container">
+                    <h1>🔐 TixGo Identity Service</h1>
+                    <p class="subtitle">Authentication & User Management for TixGo Events</p>
+                    <div class="links">
+                        <a href="/docs" class="btn-primary">📚 Swagger UI (Interactive)</a>
+                        <a href="/redoc" class="btn-secondary">📖 ReDoc (Beautiful Docs)</a>
+                        <a href="/health" class="btn-secondary">💚 Health Status</a>
+                    </div>
+                    <div class="info">
+                        <strong>Demo Credentials:</strong><br/>
+                        Username: <code>panitia1</code> | Password: <code>secret</code><br/>
+                        Username: <code>admin1</code> | Password: <code>secret</code>
+                    </div>
+                </div>
             </body>
         </html>
         """
