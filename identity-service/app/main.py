@@ -104,7 +104,7 @@ def health():
 
 @app.get("/", response_class=HTMLResponse)
 def root():
-        # Modern HTML landing page with styling
+        # Modern landing page with animated ticket background
         return """
         <!DOCTYPE html>
         <html lang="en">
@@ -114,38 +114,81 @@ def root():
                 <title>TixGo Identity Service</title>
                 <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
+                    
                     body {
                         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
                         min-height: 100vh;
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         padding: 20px;
+                        overflow: hidden;
+                        position: relative;
                     }
+                    
+                    .background-animation {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        overflow: hidden;
+                        pointer-events: none;
+                        z-index: 1;
+                    }
+                    
+                    .ticket {
+                        position: absolute;
+                        font-size: 60px;
+                        opacity: 0.1;
+                        animation: float 15s infinite ease-in-out;
+                    }
+                    
+                    .ticket:nth-child(1) { left: 5%; top: 10%; animation-delay: 0s; }
+                    .ticket:nth-child(2) { left: 15%; top: 70%; animation-delay: 2s; }
+                    .ticket:nth-child(3) { left: 80%; top: 20%; animation-delay: 4s; }
+                    .ticket:nth-child(4) { left: 85%; top: 60%; animation-delay: 6s; }
+                    .ticket:nth-child(5) { left: 40%; top: 5%; animation-delay: 8s; }
+                    .ticket:nth-child(6) { left: 60%; top: 80%; animation-delay: 10s; }
+                    
+                    @keyframes float {
+                        0%, 100% { transform: translateY(0px) rotate(0deg); }
+                        50% { transform: translateY(-30px) rotate(5deg); }
+                    }
+                    
                     .container {
-                        background: white;
-                        border-radius: 12px;
-                        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                        background: rgba(255, 255, 255, 0.15);
+                        backdrop-filter: blur(10px);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        border-radius: 16px;
+                        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
                         padding: 40px;
                         max-width: 500px;
                         width: 100%;
+                        position: relative;
+                        z-index: 2;
                     }
+                    
                     h1 {
-                        color: #333;
+                        color: #fff;
                         margin-bottom: 10px;
                         font-size: 32px;
+                        font-weight: 600;
                     }
+                    
                     .subtitle {
-                        color: #666;
+                        color: rgba(255, 255, 255, 0.85);
                         margin-bottom: 30px;
                         font-size: 14px;
                     }
+                    
                     .links {
                         display: flex;
                         flex-direction: column;
                         gap: 12px;
                     }
+                    
                     a {
                         display: block;
                         padding: 12px 16px;
@@ -155,43 +198,67 @@ def root():
                         transition: all 0.3s ease;
                         text-align: center;
                     }
+                    
                     .btn-primary {
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: rgba(255, 255, 255, 0.25);
                         color: white;
+                        border: 1px solid rgba(255, 255, 255, 0.4);
                     }
+                    
                     .btn-primary:hover {
+                        background: rgba(255, 255, 255, 0.35);
                         transform: translateY(-2px);
-                        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+                        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
                     }
+                    
                     .btn-secondary {
-                        background: #f0f0f0;
-                        color: #333;
-                        border: 2px solid #e0e0e0;
+                        background: rgba(255, 255, 255, 0.2);
+                        color: white;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
                     }
+                    
                     .btn-secondary:hover {
-                        background: #e8e8e8;
-                        border-color: #667eea;
-                        color: #667eea;
+                        background: rgba(255, 255, 255, 0.3);
+                        border-color: rgba(255, 255, 255, 0.5);
+                        transform: translateY(-2px);
                     }
+                    
                     .info {
-                        background: #f9f9f9;
-                        border-left: 4px solid #667eea;
+                        background: rgba(255, 255, 255, 0.1);
+                        border-left: 3px solid rgba(255, 255, 255, 0.5);
                         padding: 12px;
-                        border-radius: 4px;
+                        border-radius: 6px;
                         margin-top: 20px;
                         font-size: 13px;
-                        color: #555;
+                        color: rgba(255, 255, 255, 0.85);
+                    }
+                    
+                    code {
+                        background: rgba(255, 255, 255, 0.15);
+                        padding: 2px 6px;
+                        border-radius: 3px;
+                        font-family: 'Monaco', monospace;
+                        color: #fff;
                     }
                 </style>
             </head>
             <body>
+                <div class="background-animation">
+                    <div class="ticket">🎫</div>
+                    <div class="ticket">🎫</div>
+                    <div class="ticket">🎫</div>
+                    <div class="ticket">🎫</div>
+                    <div class="ticket">🎫</div>
+                    <div class="ticket">🎫</div>
+                </div>
+                
                 <div class="container">
-                    <h1>🔐 TixGo Identity Service</h1>
-                    <p class="subtitle">Authentication & User Management for TixGo Events</p>
+                    <h1>TixGo Identity Service</h1>
+                    <p class="subtitle">Authentication & User Management</p>
                     <div class="links">
-                        <a href="/docs" class="btn-primary">📚 Swagger UI (Interactive)</a>
-                        <a href="/redoc" class="btn-secondary">📖 ReDoc (Beautiful Docs)</a>
-                        <a href="/health" class="btn-secondary">💚 Health Status</a>
+                        <a href="/docs" class="btn-primary">Swagger UI (Interactive)</a>
+                        <a href="/redoc" class="btn-secondary">ReDoc (Beautiful Docs)</a>
+                        <a href="/health" class="btn-secondary">Health Status</a>
                     </div>
                     <div class="info">
                         <strong>Demo Credentials:</strong><br/>
