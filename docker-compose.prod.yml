@@ -8,7 +8,7 @@ services:
     env_file:
       - .env
     ports:
-      - "18081:8000" # keep host port so BT can route subdomain -> STB:18081
+      - "18081:8000" # expose Identity Service on host port 18081
     restart: unless-stopped
     networks:
       - tixgo-net
@@ -20,24 +20,25 @@ services:
     env_file:
       - .env
     ports:
-      - "18082:8000" # keep host port so BT can route subdomain -> STB:18082
+      - "18082:8000" # expose Attendance Service on host port 18082
     restart: unless-stopped
     networks:
       - tixgo-net
 
-  # Optional cloudflared service - usually the tunneling is handled by BT.
-  # If you want to run the tunnel from the STB itself, uncomment and provide
-  # credential file and config as described in cloudflared/config.yml.example.
-  #cloudflared:
-  #  image: cloudflare/cloudflared:latest
-  #  container_name: cloudflared
-  #  restart: unless-stopped
-  #  volumes:
-  #    - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
-  #    - ~/.cloudflared/<TUNNEL_ID>.json:/etc/cloudflared/<TUNNEL_ID>.json:ro
-  #  command: tunnel run --config /etc/cloudflared/config.yml tixgo-tunnel
-  #  networks:
-  #    - tixgo-net
+  event:
+    build:
+      context: ./event-service
+    container_name: tixgo-event
+    env_file:
+      - .env
+    environment:
+      - IDENTITY_BASE_URL=http://identity:8000     # internal URL for Identity Service (Docker network)
+      - ATTENDANCE_BASE_URL=http://attendance:8000 # internal URL for Attendance Service (Docker network)
+    ports:
+      - "18083:8000" # expose Event Management Service on host port 18083
+    restart: unless-stopped
+    networks:
+      - tixgo-net
 
 networks:
   tixgo-net:
