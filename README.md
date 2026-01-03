@@ -391,21 +391,31 @@ docker-compose up -d
 
 ```
 tixgo-microservices/
-├── identity-service/
-│   ├── app/main.py
-│   ├── Dockerfile
-│   └── requirements.txt
-├── attendance-service/
-│   ├── app/main.py
-│   ├── Dockerfile
-│   └── requirements.txt
-├── docker-compose.yml
-├── docker-compose.prod.yml
-├── deploy.sh
-├── smoke-test.sh
-├── .env.example
+├── DEPLOYMENT.md
 ├── README.md
-└── README.pdf
+├── README.pdf
+├── attendance-service/
+│   ├── Dockerfile
+│   ├── app/
+│   │   └── main.py
+│   └── requirements.txt
+├── cloudflared/
+│   └── config.yml.example
+├── deploy.sh
+├── docker-compose.prod.yml
+├── docker-compose.yml
+├── event-service/
+│   ├── Dockerfile
+│   ├── app/
+│   │   └── main.py
+│   └── requirements.txt
+├── identity-service/
+│   ├── Dockerfile
+│   ├── app/
+│   │   └── main.py
+│   └── requirements.txt
+├── smoke-test.sh
+└── test-results.txt
 ```
 
 ## References
