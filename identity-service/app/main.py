@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
@@ -7,6 +8,13 @@ from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 from passlib.hash import bcrypt
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("identity-service")
 
 app = FastAPI(
     title="TixGo Identity Service",
@@ -221,18 +229,21 @@ def root():
 @app.post("/auth/register", response_model=MeResponse)
 def register(req: RegisterRequest):
     if req.username in USERS:
+        logger.warning(f"Registration attempt with existing username: {req.username}")
         raise HTTPException(status_code=409, detail="Username already exists")
 
     _validate_password_length(req.password)
 
     role = req.role.strip().lower()
     if role not in {"committee", "admin"}:
+        logger.warning(f"Registration attempt with invalid role: {role}")
         raise HTTPException(status_code=400, detail="Invalid role (use 'committee' or 'admin')")
 
     USERS[req.username] = {
         "password_hash": bcrypt.hash(req.password),
         "role": role,
     }
+    logger.info(f"User registered successfully: {req.username} with role: {role}")
     return {"username": req.username, "role": role}
 
 
@@ -240,14 +251,17 @@ def register(req: RegisterRequest):
 def login(req: LoginRequest):
     user = USERS.get(req.username)
     if not user:
+        logger.warning(f"Login attempt with non-existent username: {req.username}")
         raise HTTPException(status_code=401, detail="Invalid username/password")
 
     _validate_password_length(req.password)
 
     if not bcrypt.verify(req.password, user["password_hash"]):
+        logger.warning(f"Login attempt with wrong password for username: {req.username}")
         raise HTTPException(status_code=401, detail="Invalid username/password")
 
     token = create_access_token(req.username, user["role"])
+    logger.info(f"User logged in successfully: {req.username}")
     return {"access_token": token, "token_type": "bearer"}
 
 

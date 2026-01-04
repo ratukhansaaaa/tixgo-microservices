@@ -15,10 +15,19 @@
 - **Configuration:** `docker-compose.prod.yml`
 
 ### Services Deployed
-| Service | Container Name | Port | Status |
-|---------|---|---|---|
-| Identity Service | tixgo-identity | 18081 | Running |
-| Attendance Service | tixgo-attendance | 18082 | Running |
+
+**Public Services (Internet Accessible):**
+| Service | Container Name | Port | Status | Role |
+|---------|---|---|---|---|
+| Identity Service | tixgo-identity | 18081 | Running | Authentication & Authorization |
+| Attendance Service | tixgo-attendance | 18082 | Running | Checkin + Event Management Proxy |
+
+**Internal Services (Docker Network Only):**
+| Service | Container Name | Port | Status | Role |
+|---------|---|---|---|---|
+| Event Service | tixgo-event | 8000 (internal) | Running | Event Management (proxied via Attendance) |
+
+**Architecture Note:** Due to 2-subdomain constraint, Event Service is deployed internally and exposed publicly via **Application-Level Proxy Pattern** in Attendance Service. Attendance Service forwards `/events*` endpoints to Event Service via internal Docker network.
 
 ---
 
@@ -131,7 +140,53 @@ Role: committee
 
 ---
 
-## 7. Important Files
+## 7. Application-Level Proxy Pattern
+
+### Overview
+To address 2-subdomain constraint while supporting 3 microservices, we implement **Application-Level Reverse Proxy** in Attendance Service.
+
+### Architecture
+
+```
+Internet Client
+    ↓
+18081: Identity Service (direct - authentication)
+18082: Attendance Service (publik gateway)
+    ├─→ /checkins* (local endpoints)
+    ├─→ /attendance* (local endpoints)
+    └─→ /events* (PROXY → Event Service)
+         └─→ Internal: http://event:8000
+
+Event Service (internal Docker network only)
+    - Port 8000 not exposed
+    - Accessible only via Attendance proxy
+```
+
+### Endpoints Exposed via Proxy
+
+**Public (via Attendance 18082):**
+```
+POST   /events                 → Create event
+GET    /events                 → List events
+GET    /events/{id}            → Get event detail
+PUT    /events/{id}            → Update event
+DELETE /events/{id}            → Delete event
+POST   /events/{id}/checkins   → Checkin for event
+GET    /events/{id}/attendance → Get attendance
+GET    /events/{id}/summary    → Get attendance summary
+```
+
+### Why This Approach?
+
+- Keeps Event Service completely internal (no port exposure)
+- Provides full functionality via single public port (18082)
+- Leverages Docker network for efficient service-to-service communication
+- Minimal infrastructure complexity (no nginx/reverse proxy needed)
+- Application-level control over request forwarding and auth validation
+
+---
+
+## 8. Important Files
 
 | File | Purpose |
 |------|---------|
@@ -145,7 +200,7 @@ Role: committee
 
 ---
 
-## 8. Verification Checklist
+## 9. Verification Checklist
 
 - Source code on GitHub: `https://github.com/ratukhansaaaa/tixgo-microservices`
 - Documentation (README.md + README.pdf)
@@ -158,7 +213,7 @@ Role: committee
 
 ---
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 ### Containers not starting?
 ```bash
@@ -187,17 +242,20 @@ openssl rand -hex 32
 
 ---
 
-## 10. Monitoring
+## 11. Monitoring
 
 ### View Logs
 ```bash
 docker compose -f docker-compose.prod.yml logs -f tixgo-identity
 docker compose -f docker-compose.prod.yml logs -f tixgo-attendance
+docker compose -f docker-compose.prod.yml logs -f tixgo-event
 ```
 
 ### Check Service Health
 ```bash
 curl http://localhost:18081/health
+curl http://localhost:18082/health
+```
 curl http://localhost:18082/health
 ```
 

@@ -15,6 +15,21 @@ services:
     container_name: tixgo-attendance
     env_file:
       - .env
+    environment:
+      - EVENT_BASE_URL=http://event-service:8000
     ports:
       - "18082:8000"
+    restart: unless-stopped
+
+  event-service:
+    build:
+      context: ./event-service
+    container_name: tixgo-event
+    env_file:
+      - .env
+    environment:
+      - IDENTITY_BASE_URL=http://identity-service:8000
+      - ATTENDANCE_BASE_URL=http://attendance-service:8000
+    ports:
+      - "18083:8000"
     restart: unless-stopped
