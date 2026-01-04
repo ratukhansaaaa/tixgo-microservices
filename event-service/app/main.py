@@ -14,9 +14,6 @@ IDENTITY_BASE_URL = os.getenv("IDENTITY_BASE_URL", "http://identity:8000")
 ATTENDANCE_BASE_URL = os.getenv("ATTENDANCE_BASE_URL", "http://attendance:8000")
 
 
-# =========================================================
-# Models (Swagger/OpenAPI)
-# =========================================================
 class EventCreateRequest(BaseModel):
     title: str = Field(min_length=1)
     description: Optional[str] = None
@@ -71,18 +68,10 @@ class EventSummaryResponse(BaseModel):
     attendance: AttendanceResponse
 
 
-# =========================================================
-# In-memory event store
-# =========================================================
+
 EVENTS: Dict[str, dict] = {}
 
 
-# =========================================================
-# Auth helpers (NO ASSUMPTION: matches your Identity)
-# Identity:
-# - GET /auth/me -> {"username": "...", "role": "..."}
-# - Token passed via Authorization: Bearer <token>
-# =========================================================
 def require_bearer_auth(authorization: Optional[str]) -> str:
     if not authorization:
         raise HTTPException(status_code=401, detail="Missing Authorization header")
@@ -114,9 +103,6 @@ def require_admin(user: IdentityMeResponse) -> None:
         raise HTTPException(status_code=403, detail="Admin only")
 
 
-# =========================================================
-# Basic routes
-# =========================================================
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "event-service"}
@@ -154,12 +140,6 @@ def root():
     """
 
 
-# =========================================================
-# Event CRUD
-# Policy:
-# - committee/admin: list/get
-# - admin only: create/update/delete
-# =========================================================
 @app.get("/events", response_model=List[EventItem])
 async def list_events(authorization: Optional[str] = Header(default=None, alias="Authorization")):
     bearer = require_bearer_auth(authorization)
@@ -230,16 +210,6 @@ async def delete_event(event_id: str, authorization: Optional[str] = Header(defa
     return {"status": "deleted", "event_id": event_id}
 
 
-# =========================================================
-# Integration with Attendance
-# Attendance service:
-# - POST /checkins {event_id, ticket_id} requires Authorization
-# - GET /attendance/{event_id} requires Authorization
-#
-# Policy:
-# - committee/admin: can check-in via event service
-# - admin only: can view attendance/summary
-# =========================================================
 @app.post("/events/{event_id}/checkins")
 async def checkin_via_event(event_id: str, payload: CheckinViaEventRequest, authorization: Optional[str] = Header(default=None, alias="Authorization")):
     bearer = require_bearer_auth(authorization)
@@ -258,7 +228,6 @@ async def checkin_via_event(event_id: str, payload: CheckinViaEventRequest, auth
         except httpx.RequestError:
             raise HTTPException(status_code=502, detail="Attendance service unreachable")
 
-    # forward status code semantics
     if r.status_code >= 400:
         raise HTTPException(status_code=r.status_code, detail=r.json().get("detail", "Attendance error"))
 

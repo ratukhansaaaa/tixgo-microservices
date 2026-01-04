@@ -8,7 +8,7 @@ services:
     env_file:
       - .env
     ports:
-      - "18081:8000" # expose Identity Service on host port 18081
+      - "18081:8000" 
     restart: unless-stopped
     networks:
       - tixgo-net
@@ -20,7 +20,7 @@ services:
     env_file:
       - .env
     ports:
-      - "18082:8000" # expose Attendance Service on host port 18082
+      - "18082:8000" 
     restart: unless-stopped
     networks:
       - tixgo-net
@@ -32,10 +32,10 @@ services:
     env_file:
       - .env
     environment:
-      - IDENTITY_BASE_URL=http://identity:8000     # internal URL for Identity Service (Docker network)
-      - ATTENDANCE_BASE_URL=http://attendance:8000 # internal URL for Attendance Service (Docker network)
+      - IDENTITY_BASE_URL=http://identity:8000     
+      - ATTENDANCE_BASE_URL=http://attendance:8000 
     ports:
-      - "18083:8000" # expose Event Management Service on host port 18083
+      - "18083:8000" 
     restart: unless-stopped
     networks:
       - tixgo-net

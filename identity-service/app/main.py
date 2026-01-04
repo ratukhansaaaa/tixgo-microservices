@@ -18,16 +18,11 @@ JWT_ALG = os.getenv("JWT_ALG", "HS256")
 TOKEN_EXPIRE_MINUTES = int(os.getenv("TOKEN_EXPIRE_MINUTES", "120"))
 
 
-# ----------------------------
-# Helpers
-# ----------------------------
-# ----------------------------
 def _password_bytes_len(pw: str) -> int:
     return len(pw.encode("utf-8"))
 
 
 def _validate_password_length(pw: str) -> None:
-    # bcrypt limit is 72 bytes
     if _password_bytes_len(pw) > 72:
         raise HTTPException(
             status_code=400,
@@ -64,19 +59,12 @@ def get_bearer_token(authorization: Optional[str]) -> str:
     return parts[1].strip()
 
 
-# ----------------------------
-# In-memory user store
-# ----------------------------
-# Format: USERS[username] = {"password_hash": "...", "role": "..."}
 USERS: Dict[str, Dict[str, str]] = {
     "panitia1": {"password_hash": bcrypt.hash("secret"), "role": "committee"},
     "admin1": {"password_hash": bcrypt.hash("secret"), "role": "admin"},
 }
 
 
-# ----------------------------
-# Schemas
-# ----------------------------
 class RegisterRequest(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     password: str = Field(..., min_length=4, max_length=200)  # bytes-length check handled manually
@@ -98,9 +86,6 @@ class MeResponse(BaseModel):
     role: str
 
 
-# ----------------------------
-# Routes
-# ----------------------------
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "identity-service"}
@@ -108,7 +93,6 @@ def health():
 
 @app.get("/", response_class=HTMLResponse)
 def root():
-        # Modern landing page with solid gradient background
         return """
         <!DOCTYPE html>
         <html lang="en">

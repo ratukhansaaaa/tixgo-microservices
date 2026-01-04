@@ -26,7 +26,6 @@
 
 ### Step 1: Copy Project Files to STB
 ```bash
-# Copy entire project via SCP
 scp -o ProxyCommand="cloudflared access ssh --hostname %h" \
   -r /path/to/tixgo-microservices/* \
   root@ssh.theokaitou.my.id:~/tixgo-microservices/
@@ -34,7 +33,6 @@ scp -o ProxyCommand="cloudflared access ssh --hostname %h" \
 
 ### Step 2: Copy .env File
 ```bash
-# Copy .env separately (not in git)
 scp -o ProxyCommand="cloudflared access ssh --hostname %h" \
   /path/to/.env \
   root@ssh.theokaitou.my.id:~/tixgo-microservices/.env
@@ -42,12 +40,10 @@ scp -o ProxyCommand="cloudflared access ssh --hostname %h" \
 
 ### Step 3: Run Deployment Script
 ```bash
-# SSH into STB and run deploy script
 ssh -o ProxyCommand="cloudflared access ssh --hostname %h" \
   -o StrictHostKeyChecking=accept-new \
   root@ssh.theokaitou.my.id
 
-# On STB:
 cd ~/tixgo-microservices
 chmod +x deploy.sh
 ./deploy.sh
@@ -55,10 +51,8 @@ chmod +x deploy.sh
 
 ### Step 4: Verify Deployment
 ```bash
-# Check running containers
 docker compose -f docker-compose.prod.yml ps
 
-# Test health endpoints
 curl http://localhost:18081/health
 curl http://localhost:18082/health
 ```
@@ -182,9 +176,7 @@ kill -9 <PID>
 
 ### JWT_SECRET error?
 ```bash
-# Verify .env file exists with valid JWT_SECRET
 cat .env
-# Regenerate if needed
 openssl rand -hex 32
 ```
 

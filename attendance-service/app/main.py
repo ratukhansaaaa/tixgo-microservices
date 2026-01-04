@@ -15,8 +15,7 @@ app = FastAPI(
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret")
 JWT_ALG = os.getenv("JWT_ALG", "HS256")
 
-# Demo in-memory checkin storage:
-# CHECKINS[event_id][ticket_id] = {"checked_in_at": datetime, "checked_in_by": "..."}
+
 CHECKINS: Dict[str, Dict[str, dict]] = {}
 
 
@@ -40,13 +39,11 @@ def require_auth(authorization: Optional[str]) -> str:
         raise HTTPException(status_code=401, detail="Token invalid")
 
 
-# ===== Request Models =====
 class CheckinRequest(BaseModel):
     event_id: str = Field(min_length=1)
     ticket_id: str = Field(min_length=1)
 
 
-# ===== Response Models (untuk Swagger/OpenAPI biar rapi) =====
 class CheckinRecord(BaseModel):
     event_id: str
     ticket_id: str
