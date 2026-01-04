@@ -1,23 +1,26 @@
 # TixGo Microservices
 
-Sistem microservices berbasis FastAPI untuk manajemen ticketing dan event attendance.
+Event ticketing system built with FastAPI microservices architecture. Demonstrates service-to-service communication, JWT authentication, and practical solutions to deployment constraints.
 
 ## Overview
 
-Dua layanan microservices independen berjalan di Docker containers dengan port mapping masing-masing:
+Two primary microservices with one internal service:
 
-**1. Identity Service (Port 18081)**
-- User registration dengan password hashing (bcrypt)
-- Login dan JWT token generation (HS256)
-- User info retrieval endpoint
-- Role management (committee, admin)
+**Identity Service (Port 18081)**
+- User registration with bcrypt password hashing
+- Login and JWT token generation (HS256)
+- User info retrieval with role-based access control
 
-**2. Attendance Service (Port 18082)**
-- Check-in peserta ke event
-- Attendance query per event
-- JWT token validation
+**Attendance Service (Port 18082)**
+- Check-in management for event participants
+- Attendance tracking and queries
+- Reverse proxy to internal Event Service
 
-**Tech Stack:** FastAPI 0.115.6, Python 3.11, Docker & Docker Compose, JWT Authentication (HS256), bcrypt password hashing, in-memory data store.
+**Event Service (Port 8000 - Internal)**
+- Event CRUD operations
+- Not publicly exposed; accessed only through Attendance Service
+
+**Built with:** FastAPI 0.115.6, Python 3.11, Docker Compose, JWT authentication, bcrypt hashing.
 
 ## Cara Mengakses Layanan
 
@@ -418,6 +421,105 @@ tixgo-microservices/
 └── test-results.txt
 ```
 
+## Production Deployment Status
+
+### Current Setup (January 2026)
+
+**Server:** Armbian Linux ARM on STB (192.168.0.114)
+- Docker Compose: Running all 3 services
+- Reverse Proxy: Nginx configured for domain routing
+- SSL: Self-signed certificate ready
+
+### Access Methods
+
+**Local Testing (STB)**
+```
+Identity Service:  http://localhost:18081
+Attendance Service: http://localhost:18082
+Event Service:     http://localhost:8000 (internal only)
+```
+
+**Network Access (via IP)**
+```
+Identity Service:  http://192.168.0.114:18081
+Attendance Service: http://192.168.0.114:18082
+Event Service:     http://192.168.0.114:8000 (internal only)
+```
+
+**Public Domain Access**
+```
+Identity Service:  https://dina.theokaitou.my.id
+Attendance Service: https://ratu.theokaitou.my.id
+```
+
+DNS records configured. SSL certificate: self-signed (generated Jan 5, 2026).
+
+### System Architecture
+
+**Three Services, Two Public Domains:**
+
+The challenge: 2 subdomains available, 3 microservices needed. Solution: Application-level reverse proxy.
+
+- **Identity Service (18081):** User registration and authentication. Public endpoint.
+- **Attendance Service (18082):** Checkin operations and event access. Public endpoint.
+  - Native endpoints: /checkins, /attendance/{event_id}
+  - Proxy endpoints: /events/* forwards to Event Service
+- **Event Service (8000):** Event CRUD operations. Internal only (no public port).
+  - Not accessible directly from outside
+  - Accessed exclusively through Attendance Service proxy
+
+**Why this works:**
+When a client calls `POST /events` on Attendance Service, it transparently forwards to Event Service. No direct access to port 8000 needed.
+
+### Deployment Details
+
+**Docker Network:** tixgo-net (bridge mode)
+- Services communicate internally
+- Event Service not exposed to host ports
+
+**Authentication:** JWT HS256
+- 120-minute token lifetime
+- Passwords hashed with bcrypt (12 rounds)
+- Role-based: committee (read/checkin only) or admin (full access)
+
+**Hosting:** Docker containers with restart policy
+- Each service independent
+- Health checks available on /health endpoint
+
+### Deployment Commands
+
+```bash
+# On STB
+cd ~/tixgo-microservices
+
+# Pull latest code
+git pull origin main
+
+# Build and start all services
+docker compose up -d --build
+
+# Verify deployment
+docker compose ps
+
+# Check service health
+curl http://localhost:18081/health
+curl http://localhost:18082/health
+```
+
+### Monitoring
+
+```bash
+# View container logs
+docker compose logs -f identity-service
+docker compose logs -f attendance-service
+docker compose logs -f event-service
+
+# Check resource usage
+docker stats
+```
+
+---
+
 ## References
 
 - FastAPI: https://fastapi.tiangolo.com
@@ -427,5 +529,5 @@ tixgo-microservices/
 ---
 
 **Version:** 1.0.0
-**Status:** Production Ready for Tugas 2
+**Last Updated:** January 5, 2026
 **Repository:** https://github.com/ratukhansaaaa/tixgo-microservices
