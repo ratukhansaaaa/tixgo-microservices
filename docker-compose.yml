@@ -30,6 +30,4 @@ services:
     environment:
       - IDENTITY_BASE_URL=http://identity-service:8000
       - ATTENDANCE_BASE_URL=http://attendance-service:8000
-    ports:
-      - "18083:8000"
     restart: unless-stopped
