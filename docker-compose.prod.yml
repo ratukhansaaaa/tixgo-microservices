@@ -41,6 +41,23 @@ services:
     networks:
       - tixgo-net
 
+  nginx:
+    image: nginx:latest
+    container_name: tixgo-nginx
+    ports:
+      - "80:80"     # HTTP (for certbot validation)
+      - "443:443"   # HTTPS
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/dhparam.pem:/etc/nginx/dhparam.pem:ro
+    depends_on:
+      - identity
+      - attendance
+    restart: unless-stopped
+    networks:
+      - tixgo-net
+
 networks:
   tixgo-net:
     driver: bridge
