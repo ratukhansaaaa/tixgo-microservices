@@ -6,6 +6,7 @@ from typing import Dict, Optional
 import jwt
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from passlib.hash import bcrypt
 
@@ -19,6 +20,20 @@ logger = logging.getLogger("identity-service")
 app = FastAPI(
     title="TixGo Identity Service",
     version="1.0.0"
+)
+
+# CORS Configuration for GitHub Pages frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://irdinailmunaa.github.io",
+        "http://localhost:8080",
+        "http://localhost:3000",
+        "http://localhost",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret")
